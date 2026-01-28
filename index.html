@@ -98,6 +98,11 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
         .btn {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -135,6 +140,11 @@
             font-size: 0.875rem;
         }
 
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
         .info-box {
             background: rgba(37, 99, 235, 0.1);
             padding: 1rem;
@@ -143,13 +153,6 @@
             margin-bottom: 1.5rem;
             font-size: 0.875rem;
             color: var(--text-secondary);
-        }
-
-        .divider {
-            text-align: center;
-            margin: 1.5rem 0;
-            color: var(--text-tertiary);
-            font-size: 0.875rem;
         }
 
         .loading {
@@ -173,7 +176,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Main App Styles (same as before) */
         .app-container {
             display: none;
             min-height: 100vh;
@@ -374,11 +376,6 @@
             grid-column: 1 / -1;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
         .transaction-list {
             max-height: 500px;
             overflow-y: auto;
@@ -448,11 +445,6 @@
 
         .transaction-amount.expense {
             color: var(--danger);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
         }
 
         .tabs {
@@ -564,36 +556,6 @@
             margin-bottom: 0.5rem;
         }
 
-        .insight-card {
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .insight-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .insight-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .insight-text {
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
         .alert {
             padding: 1rem 1.5rem;
             border-radius: 8px;
@@ -654,6 +616,13 @@
             margin: 0 2rem 1rem;
         }
 
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
         @media (max-width: 968px) {
             .sidebar {
                 display: none;
@@ -669,6 +638,10 @@
             }
 
             .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -704,7 +677,7 @@
         </div>
     </div>
 
-    <!-- Main App (igual ao anterior, só com sync) -->
+    <!-- Main App -->
     <div id="appContainer" class="app-container">
         <aside class="sidebar">
             <div class="logo">
@@ -809,10 +782,9 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Seus Orçamentos</h2>
-                            <button class="btn btn-sm btn-secondary" onclick="switchPage('budget')">Gerenciar</button>
+                            <h2 class="card-title">Gastos por Meio de Pagamento</h2>
                         </div>
-                        <div id="dashBudgets"></div>
+                        <div id="dashPaymentMethods"></div>
                     </div>
                 </div>
             </div>
@@ -868,6 +840,27 @@
                                 </select>
                             </div>
                             <div class="form-group">
+                                <label>Forma de Pagamento</label>
+                                <select id="transPaymentMethod" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Débito">Cartão de Débito</option>
+                                    <option value="Crédito">Cartão de Crédito</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Transferência">Transferência Bancária</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Conta/Cartão</label>
+                                <select id="transAccount" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Nubank">Nubank</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Data</label>
                                 <input type="date" id="transDate" required>
                             </div>
@@ -885,12 +878,37 @@
                         <div class="card-header">
                             <h2 class="card-title">Histórico</h2>
                         </div>
-                        <div style="margin-bottom: 1.5rem;">
-                            <label>Filtrar por Mês</label>
-                            <select id="transactionMonthFilter" style="cursor: pointer;">
-                                <option value="all">Todos os meses</option>
-                            </select>
+                        
+                        <div class="filter-grid">
+                            <div>
+                                <label>Filtrar por Mês</label>
+                                <select id="transactionMonthFilter" style="cursor: pointer;">
+                                    <option value="all">Todos os meses</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Forma de Pagamento</label>
+                                <select id="paymentMethodFilter" style="cursor: pointer;">
+                                    <option value="">Todas</option>
+                                    <option value="Pix">Pix</option>
+                                    <option value="Débito">Cartão de Débito</option>
+                                    <option value="Crédito">Cartão de Crédito</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Transferência">Transferência Bancária</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Conta/Cartão</label>
+                                <select id="accountFilter" style="cursor: pointer;">
+                                    <option value="">Todas</option>
+                                    <option value="Nubank">Nubank</option>
+                                    <option value="Santander">Santander</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
                         </div>
+
                         <div class="tabs">
                             <button class="tab active" data-filter="all">Todas</button>
                             <button class="tab" data-filter="income">Receitas</button>
@@ -1043,31 +1061,27 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
-        // IMPORTANTE: Você precisa criar um projeto no Firebase Console (https://console.firebase.google.com)
-        // e substituir essas configurações pelas suas próprias
+        // Firebase Configuration
         const firebaseConfig = {
-    apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
-    authDomain: "financas-5c7b4.firebaseapp.com",
-    databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-    projectId: "financas-5c7b4",
-    storageBucket: "financas-5c7b4.firebasestorage.app",
-    messagingSenderId: "598951471840",
-    appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
-};
-        // Inicializar Firebase
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
+
         let app, database;
         let currentUserEmail = '';
         let userDataRef = null;
 
-        // Data
         let transactions = [];
         let budgets = [];
         let goals = [];
 
         const today = new Date().toISOString().split('T')[0];
         
-        // Setup User
         function setupUser() {
             const email = document.getElementById('userEmail').value.trim();
             if (!email || !email.includes('@')) {
@@ -1078,16 +1092,13 @@
             document.getElementById('setupLoading').style.display = 'block';
             currentUserEmail = email;
 
-            // Sanitize email for Firebase key
             const userKey = email.replace(/[.#$[\]]/g, '_');
 
             try {
-                // Initialize Firebase
                 app = firebase.initializeApp(firebaseConfig);
                 database = firebase.database();
                 userDataRef = database.ref('users/' + userKey);
 
-                // Load user data
                 userDataRef.once('value').then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
@@ -1096,16 +1107,12 @@
                         goals = data.goals || [];
                     }
 
-                    // Show app
                     document.getElementById('setupScreen').style.display = 'none';
                     document.getElementById('appContainer').classList.add('active');
                     document.getElementById('currentUser').textContent = currentUserEmail;
                     document.getElementById('transDate').value = today;
 
-                    // Setup real-time sync
                     setupRealtimeSync();
-
-                    // Initialize app
                     updateDashboard();
                     populateMonthFilters();
 
@@ -1122,7 +1129,6 @@
             }
         }
 
-        // Setup Real-time Sync
         function setupRealtimeSync() {
             userDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -1131,17 +1137,15 @@
                     budgets = data.budgets || [];
                     goals = data.goals || [];
                     
-                    // Refresh current view
                     const activePage = document.querySelector('.nav-link.active').dataset.page;
                     if (activePage === 'dashboard') updateDashboard();
-                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter);
+                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
                     if (activePage === 'budget') renderBudgets();
                     if (activePage === 'goals') renderGoals();
                 }
             });
         }
 
-        // Save to Cloud
         function saveToCloud() {
             if (userDataRef) {
                 userDataRef.set({
@@ -1153,7 +1157,6 @@
             }
         }
 
-        // Logout
         function logout() {
             if (confirm('Deseja sair? Seus dados estão salvos na nuvem.')) {
                 location.reload();
@@ -1181,13 +1184,6 @@
             if (page === 'goals') renderGoals();
         }
 
-        // [REST OF THE CODE IS THE SAME AS THE ORIGINAL FILE - ALL THE FUNCTIONS FOR:
-        // formatCurrency, formatDate, filterTransactionsByMonth, populateMonthFilters,
-        // calculateTotals, updateDashboard, renderTransactions, deleteTransaction,
-        // getSpentByCategory, budgetForm, renderBudgets, deleteBudget,
-        // goalForm, renderGoals, updateGoalProgress, deleteGoal, etc.]
-
-        // Currency Formatter
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
@@ -1195,7 +1191,6 @@
             }).format(value);
         }
 
-        // Date Formatter
         function formatDate(dateString) {
             const date = new Date(dateString + 'T00:00:00');
             return date.toLocaleDateString('pt-BR', {
@@ -1205,7 +1200,6 @@
             });
         }
 
-        // Populate Month Filters
         function populateMonthFilters() {
             if (transactions.length === 0) return;
 
@@ -1247,7 +1241,6 @@
             transFilter.value = currentTransValue;
         }
 
-        // Filter transactions by month
         function filterTransactionsByMonth(transactions, monthFilter) {
             if (monthFilter === 'all') return transactions;
             
@@ -1258,7 +1251,6 @@
             });
         }
 
-        // Calculate Totals
         function calculateTotals(monthFilter = 'all') {
             let filteredTransactions = transactions;
             
@@ -1280,7 +1272,6 @@
             return { income, expense, balance, savingsRate };
         }
 
-        // Update Dashboard
         function updateDashboard() {
             const monthFilter = document.getElementById('dashboardMonthFilter').value;
             const { income, expense, balance, savingsRate } = calculateTotals(monthFilter);
@@ -1305,7 +1296,7 @@
                         </div>
                         <div class="transaction-details">
                             <div class="transaction-desc">${t.description}</div>
-                            <div class="transaction-meta">${t.category} • ${formatDate(t.date)}</div>
+                            <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${t.account || 'N/A'} • ${formatDate(t.date)}</div>
                         </div>
                         <div class="transaction-amount ${t.type}">
                             ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
@@ -1314,29 +1305,33 @@
                 `).join('');
             }
 
-            const dashBudgetsEl = document.getElementById('dashBudgets');
-            if (budgets.length === 0) {
-                dashBudgetsEl.innerHTML = '<div class="empty-state"><p>Nenhum orçamento criado</p></div>';
-            } else {
-                dashBudgetsEl.innerHTML = budgets.slice(0, 3).map(budget => {
-                    const spent = getSpentByCategory(budget.category, monthFilter);
-                    const percentage = (spent / budget.limit) * 100;
-                    let progressClass = '';
-                    if (percentage >= 90) progressClass = 'danger';
-                    else if (percentage >= 70) progressClass = 'warning';
+            // Payment Methods Summary
+            const paymentMethods = {};
+            filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
+                const method = t.paymentMethod || 'Não especificado';
+                paymentMethods[method] = (paymentMethods[method] || 0) + t.amount;
+            });
 
-                    return `
-                        <div class="budget-item">
-                            <div class="budget-header">
-                                <span class="budget-name">${budget.category}</span>
-                                <span class="budget-amount">${formatCurrency(spent)} / ${formatCurrency(budget.limit)}</span>
+            const dashPaymentEl = document.getElementById('dashPaymentMethods');
+            if (Object.keys(paymentMethods).length === 0) {
+                dashPaymentEl.innerHTML = '<div class="empty-state"><p>Nenhuma despesa registrada</p></div>';
+            } else {
+                dashPaymentEl.innerHTML = Object.entries(paymentMethods)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([method, amount]) => {
+                        const percentage = (amount / expense * 100).toFixed(1);
+                        return `
+                            <div class="budget-item">
+                                <div class="budget-header">
+                                    <span class="budget-name">${method}</span>
+                                    <span class="budget-amount">${formatCurrency(amount)} (${percentage}%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill ${progressClass}" style="width: ${Math.min(percentage, 100)}%"></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                        `;
+                    }).join('');
             }
 
             populateMonthFilters();
@@ -1352,6 +1347,8 @@
                 description: document.getElementById('transDesc').value,
                 amount: parseFloat(document.getElementById('transAmount').value),
                 category: document.getElementById('transCategory').value,
+                paymentMethod: document.getElementById('transPaymentMethod').value,
+                account: document.getElementById('transAccount').value,
                 date: document.getElementById('transDate').value,
                 notes: document.getElementById('transNotes').value
             };
@@ -1363,7 +1360,7 @@
             document.getElementById('transDate').value = today;
             
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter);
+            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
             updateDashboard();
         });
 
@@ -1371,11 +1368,15 @@
         let currentTypeFilter = 'all';
         let currentCategoryFilter = '';
         let currentMonthFilter = 'all';
+        let currentPaymentFilter = '';
+        let currentAccountFilter = '';
 
-        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all') {
+        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all', paymentFilter = '', accountFilter = '') {
             currentTypeFilter = typeFilter;
             currentCategoryFilter = categoryFilter;
             currentMonthFilter = monthFilter;
+            currentPaymentFilter = paymentFilter;
+            currentAccountFilter = accountFilter;
 
             let filtered = transactions;
 
@@ -1389,6 +1390,14 @@
 
             if (categoryFilter) {
                 filtered = filtered.filter(t => t.category === categoryFilter);
+            }
+
+            if (paymentFilter) {
+                filtered = filtered.filter(t => t.paymentMethod === paymentFilter);
+            }
+
+            if (accountFilter) {
+                filtered = filtered.filter(t => t.account === accountFilter);
             }
 
             const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1406,7 +1415,7 @@
                     </div>
                     <div class="transaction-details">
                         <div class="transaction-desc">${t.description}</div>
-                        <div class="transaction-meta">${t.category} • ${formatDate(t.date)}</div>
+                        <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${t.account || 'N/A'} • ${formatDate(t.date)}</div>
                     </div>
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
@@ -1426,6 +1435,8 @@
                 const categoryFilterContainer = document.getElementById('categoryFilterContainer');
                 const categoryFilter = document.getElementById('categoryFilter');
                 const monthFilter = document.getElementById('transactionMonthFilter').value;
+                const paymentFilter = document.getElementById('paymentMethodFilter').value;
+                const accountFilter = document.getElementById('accountFilter').value;
                 const incomeCategories = document.getElementById('incomeCategories');
                 const expenseCategories = document.getElementById('expenseCategories');
                 
@@ -1445,13 +1456,15 @@
                     }
                 }
                 
-                renderTransactions(filterType, categoryFilter.value, monthFilter);
+                renderTransactions(filterType, categoryFilter.value, monthFilter, paymentFilter, accountFilter);
             });
         });
 
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             const monthFilter = document.getElementById('transactionMonthFilter').value;
-            renderTransactions(currentTypeFilter, e.target.value, monthFilter);
+            const paymentFilter = document.getElementById('paymentMethodFilter').value;
+            const accountFilter = document.getElementById('accountFilter').value;
+            renderTransactions(currentTypeFilter, e.target.value, monthFilter, paymentFilter, accountFilter);
         });
 
         document.getElementById('dashboardMonthFilter').addEventListener('change', () => {
@@ -1460,8 +1473,24 @@
 
         document.getElementById('transactionMonthFilter').addEventListener('change', (e) => {
             const categoryFilter = document.getElementById('categoryFilter').value;
+            const paymentFilter = document.getElementById('paymentMethodFilter').value;
+            const accountFilter = document.getElementById('accountFilter').value;
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, categoryFilter, e.target.value);
+            renderTransactions(currentTypeFilter, categoryFilter, e.target.value, paymentFilter, accountFilter);
+        });
+
+        document.getElementById('paymentMethodFilter').addEventListener('change', (e) => {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const monthFilter = document.getElementById('transactionMonthFilter').value;
+            const accountFilter = document.getElementById('accountFilter').value;
+            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, e.target.value, accountFilter);
+        });
+
+        document.getElementById('accountFilter').addEventListener('change', (e) => {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const monthFilter = document.getElementById('transactionMonthFilter').value;
+            const paymentFilter = document.getElementById('paymentMethodFilter').value;
+            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, paymentFilter, e.target.value);
         });
 
         function deleteTransaction(id) {
@@ -1469,7 +1498,7 @@
                 transactions = transactions.filter(t => t.id !== id);
                 saveToCloud();
                 populateMonthFilters();
-                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter);
+                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
                 updateDashboard();
             }
         }
