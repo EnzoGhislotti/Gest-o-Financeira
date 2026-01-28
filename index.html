@@ -162,6 +162,13 @@
         .btn-danger {
             background: var(--danger);
             color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
         }
 
         .info-box {
@@ -283,9 +290,14 @@
         }
 
         .logout-btn {
-            margin: 1rem 2rem 0;
-            background: var(--danger-light);
-            color: var(--danger);
+            margin: 1.5rem 2rem;
+            background: var(--danger);
+            color: white;
+            width: calc(100% - 4rem);
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
         }
 
         .main-content {
@@ -1464,7 +1476,7 @@
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
                     </div>
-                    <button class="btn btn-sm btn-danger" onclick="deleteTransaction(${t.id})">×</button>
+                    <button class="btn btn-danger" style="margin-left: 1rem;" onclick="deleteTransaction(${t.id})">Excluir</button>
                 </div>
             `).join('');
         }
