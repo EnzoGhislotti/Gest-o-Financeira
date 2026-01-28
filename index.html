@@ -162,13 +162,20 @@
         .btn-danger {
             background: var(--danger);
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             font-size: 0.875rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .btn-danger:hover {
             background: #b91c1c;
             box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .transaction-item .btn-danger {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
         }
 
         .info-box {
@@ -419,6 +426,7 @@
             padding: 1rem;
             border-bottom: 1px solid var(--border);
             transition: background 0.2s;
+            gap: 1rem;
         }
 
         .transaction-item:hover {
@@ -1476,7 +1484,7 @@
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
                     </div>
-                    <button class="btn btn-danger" style="margin-left: 1rem;" onclick="deleteTransaction(${t.id})">Excluir</button>
+                    <button class="btn btn-danger" onclick="deleteTransaction(${t.id})">Excluir</button>
                 </div>
             `).join('');
         }
