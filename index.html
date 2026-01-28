@@ -25,6 +25,25 @@
             --shadow: rgba(0, 0, 0, 0.08);
         }
 
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-accent: #334155;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --success-light: #064e3b;
+            --warning: #f59e0b;
+            --warning-light: #78350f;
+            --danger: #ef4444;
+            --danger-light: #7f1d1d;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border: #475569;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -136,8 +155,8 @@
         }
 
         .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
         }
 
         .btn-danger {
@@ -616,6 +635,25 @@
             margin: 0 2rem 1rem;
         }
 
+        .theme-toggle {
+            padding: 0.5rem 1rem;
+            background: var(--bg-accent);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 2rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--border);
+        }
+
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -691,6 +729,10 @@
             <div class="sync-status">
                 <span>✓</span> Sincronizado
             </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Tema Escuro</span>
+            </button>
             <nav>
                 <ul class="nav-menu">
                     <li class="nav-item">
@@ -744,11 +786,22 @@
                 </div>
 
                 <div style="margin-bottom: 2rem;">
-                    <div class="form-group" style="max-width: 300px;">
-                        <label>Filtrar por Mês</label>
-                        <select id="dashboardMonthFilter" style="cursor: pointer;">
-                            <option value="all">Todos os meses</option>
-                        </select>
+                    <div class="filter-grid" style="max-width: 600px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Filtrar por Mês</label>
+                            <select id="dashboardMonthFilter" style="cursor: pointer;">
+                                <option value="all">Todos os meses</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Forma de Pagamento</label>
+                            <select id="dashboardPaymentFilter" style="cursor: pointer;">
+                                <option value="">Todas</option>
+                                <option value="Nubank">Nubank</option>
+                                <option value="Santander">Santander</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -843,28 +896,16 @@
                                 <label>Forma de Pagamento</label>
                                 <select id="transPaymentMethod" required>
                                     <option value="">Selecione...</option>
-                                    <option value="Pix">Pix</option>
-                                    <option value="Débito">Cartão de Débito</option>
-                                    <option value="Crédito">Cartão de Crédito</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="Transferência">Transferência Bancária</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Conta/Cartão</label>
-                                <select id="transAccount" required>
-                                    <option value="">Selecione...</option>
                                     <option value="Nubank">Nubank</option>
                                     <option value="Santander">Santander</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="Outro">Outro</option>
+                                    <option value="Pix">Pix</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Data</label>
                                 <input type="date" id="transDate" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label>Observações (opcional)</label>
                                 <textarea id="transNotes" placeholder="Adicione detalhes sobre esta transação..."></textarea>
                             </div>
@@ -890,21 +931,9 @@
                                 <label>Forma de Pagamento</label>
                                 <select id="paymentMethodFilter" style="cursor: pointer;">
                                     <option value="">Todas</option>
-                                    <option value="Pix">Pix</option>
-                                    <option value="Débito">Cartão de Débito</option>
-                                    <option value="Crédito">Cartão de Crédito</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="Transferência">Transferência Bancária</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Conta/Cartão</label>
-                                <select id="accountFilter" style="cursor: pointer;">
-                                    <option value="">Todas</option>
                                     <option value="Nubank">Nubank</option>
                                     <option value="Santander">Santander</option>
-                                    <option value="Dinheiro">Dinheiro</option>
-                                    <option value="Outro">Outro</option>
+                                    <option value="Pix">Pix</option>
                                 </select>
                             </div>
                         </div>
@@ -1139,7 +1168,7 @@
                     
                     const activePage = document.querySelector('.nav-link.active').dataset.page;
                     if (activePage === 'dashboard') updateDashboard();
-                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
+                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
                     if (activePage === 'budget') renderBudgets();
                     if (activePage === 'goals') renderGoals();
                 }
@@ -1251,11 +1280,15 @@
             });
         }
 
-        function calculateTotals(monthFilter = 'all') {
+        function calculateTotals(monthFilter = 'all', paymentFilter = '') {
             let filteredTransactions = transactions;
             
             if (monthFilter !== 'all') {
-                filteredTransactions = filterTransactionsByMonth(transactions, monthFilter);
+                filteredTransactions = filterTransactionsByMonth(filteredTransactions, monthFilter);
+            }
+
+            if (paymentFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.paymentMethod === paymentFilter);
             }
 
             const income = filteredTransactions
@@ -1274,14 +1307,21 @@
 
         function updateDashboard() {
             const monthFilter = document.getElementById('dashboardMonthFilter').value;
-            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter);
+            const paymentFilter = document.getElementById('dashboardPaymentFilter').value;
+            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter, paymentFilter);
 
             document.getElementById('dashIncome').textContent = formatCurrency(income);
             document.getElementById('dashExpense').textContent = formatCurrency(expense);
             document.getElementById('dashBalance').textContent = formatCurrency(balance);
             document.getElementById('savingsRate').textContent = savingsRate + '%';
 
-            let filteredTransactions = monthFilter === 'all' ? transactions : filterTransactionsByMonth(transactions, monthFilter);
+            let filteredTransactions = transactions;
+            if (monthFilter !== 'all') {
+                filteredTransactions = filterTransactionsByMonth(filteredTransactions, monthFilter);
+            }
+            if (paymentFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.paymentMethod === paymentFilter);
+            }
 
             const recent = [...filteredTransactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
             const dashTransEl = document.getElementById('dashTransactions');
@@ -1296,7 +1336,7 @@
                         </div>
                         <div class="transaction-details">
                             <div class="transaction-desc">${t.description}</div>
-                            <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${t.account || 'N/A'} • ${formatDate(t.date)}</div>
+                            <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${formatDate(t.date)}${t.notes ? ' • ' + t.notes : ''}</div>
                         </div>
                         <div class="transaction-amount ${t.type}">
                             ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
@@ -1305,33 +1345,44 @@
                 `).join('');
             }
 
-            // Payment Methods Summary
+            // Payment Methods Summary - Always show in order: Nubank, Santander, Pix
+            const paymentOrder = ['Nubank', 'Santander', 'Pix'];
             const paymentMethods = {};
+            
+            // Initialize with 0
+            paymentOrder.forEach(method => {
+                paymentMethods[method] = 0;
+            });
+            
+            // Calculate totals
             filteredTransactions.filter(t => t.type === 'expense').forEach(t => {
-                const method = t.paymentMethod || 'Não especificado';
-                paymentMethods[method] = (paymentMethods[method] || 0) + t.amount;
+                const method = t.paymentMethod || 'Outros';
+                if (paymentOrder.includes(method)) {
+                    paymentMethods[method] += t.amount;
+                }
             });
 
             const dashPaymentEl = document.getElementById('dashPaymentMethods');
-            if (Object.keys(paymentMethods).length === 0) {
+            const totalExpenseFiltered = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            
+            if (totalExpenseFiltered === 0) {
                 dashPaymentEl.innerHTML = '<div class="empty-state"><p>Nenhuma despesa registrada</p></div>';
             } else {
-                dashPaymentEl.innerHTML = Object.entries(paymentMethods)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([method, amount]) => {
-                        const percentage = (amount / expense * 100).toFixed(1);
-                        return `
-                            <div class="budget-item">
-                                <div class="budget-header">
-                                    <span class="budget-name">${method}</span>
-                                    <span class="budget-amount">${formatCurrency(amount)} (${percentage}%)</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${percentage}%"></div>
-                                </div>
+                dashPaymentEl.innerHTML = paymentOrder.map(method => {
+                    const amount = paymentMethods[method];
+                    const percentage = totalExpenseFiltered > 0 ? (amount / totalExpenseFiltered * 100).toFixed(1) : 0;
+                    return `
+                        <div class="budget-item">
+                            <div class="budget-header">
+                                <span class="budget-name">${method}</span>
+                                <span class="budget-amount">${formatCurrency(amount)} (${percentage}%)</span>
                             </div>
-                        `;
-                    }).join('');
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             populateMonthFilters();
@@ -1348,7 +1399,6 @@
                 amount: parseFloat(document.getElementById('transAmount').value),
                 category: document.getElementById('transCategory').value,
                 paymentMethod: document.getElementById('transPaymentMethod').value,
-                account: document.getElementById('transAccount').value,
                 date: document.getElementById('transDate').value,
                 notes: document.getElementById('transNotes').value
             };
@@ -1360,7 +1410,7 @@
             document.getElementById('transDate').value = today;
             
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
+            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
             updateDashboard();
         });
 
@@ -1369,14 +1419,12 @@
         let currentCategoryFilter = '';
         let currentMonthFilter = 'all';
         let currentPaymentFilter = '';
-        let currentAccountFilter = '';
 
-        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all', paymentFilter = '', accountFilter = '') {
+        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all', paymentFilter = '') {
             currentTypeFilter = typeFilter;
             currentCategoryFilter = categoryFilter;
             currentMonthFilter = monthFilter;
             currentPaymentFilter = paymentFilter;
-            currentAccountFilter = accountFilter;
 
             let filtered = transactions;
 
@@ -1396,10 +1444,6 @@
                 filtered = filtered.filter(t => t.paymentMethod === paymentFilter);
             }
 
-            if (accountFilter) {
-                filtered = filtered.filter(t => t.account === accountFilter);
-            }
-
             const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
             const listEl = document.getElementById('allTransactions');
 
@@ -1415,12 +1459,12 @@
                     </div>
                     <div class="transaction-details">
                         <div class="transaction-desc">${t.description}</div>
-                        <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${t.account || 'N/A'} • ${formatDate(t.date)}</div>
+                        <div class="transaction-meta">${t.category} • ${t.paymentMethod || 'N/A'} • ${formatDate(t.date)}${t.notes ? ' • ' + t.notes : ''}</div>
                     </div>
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+' : '-'} ${formatCurrency(t.amount)}
                     </div>
-                    <button class="btn btn-sm btn-danger" onclick="deleteTransaction(${t.id})">Excluir</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteTransaction(${t.id})">×</button>
                 </div>
             `).join('');
         }
@@ -1436,7 +1480,6 @@
                 const categoryFilter = document.getElementById('categoryFilter');
                 const monthFilter = document.getElementById('transactionMonthFilter').value;
                 const paymentFilter = document.getElementById('paymentMethodFilter').value;
-                const accountFilter = document.getElementById('accountFilter').value;
                 const incomeCategories = document.getElementById('incomeCategories');
                 const expenseCategories = document.getElementById('expenseCategories');
                 
@@ -1456,41 +1499,35 @@
                     }
                 }
                 
-                renderTransactions(filterType, categoryFilter.value, monthFilter, paymentFilter, accountFilter);
+                renderTransactions(filterType, categoryFilter.value, monthFilter, paymentFilter);
             });
         });
 
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             const monthFilter = document.getElementById('transactionMonthFilter').value;
             const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            const accountFilter = document.getElementById('accountFilter').value;
-            renderTransactions(currentTypeFilter, e.target.value, monthFilter, paymentFilter, accountFilter);
+            renderTransactions(currentTypeFilter, e.target.value, monthFilter, paymentFilter);
         });
 
         document.getElementById('dashboardMonthFilter').addEventListener('change', () => {
             updateDashboard();
         });
 
+        document.getElementById('dashboardPaymentFilter').addEventListener('change', () => {
+            updateDashboard();
+        });
+
         document.getElementById('transactionMonthFilter').addEventListener('change', (e) => {
             const categoryFilter = document.getElementById('categoryFilter').value;
             const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            const accountFilter = document.getElementById('accountFilter').value;
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, categoryFilter, e.target.value, paymentFilter, accountFilter);
+            renderTransactions(currentTypeFilter, categoryFilter, e.target.value, paymentFilter);
         });
 
         document.getElementById('paymentMethodFilter').addEventListener('change', (e) => {
             const categoryFilter = document.getElementById('categoryFilter').value;
             const monthFilter = document.getElementById('transactionMonthFilter').value;
-            const accountFilter = document.getElementById('accountFilter').value;
-            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, e.target.value, accountFilter);
-        });
-
-        document.getElementById('accountFilter').addEventListener('change', (e) => {
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            const monthFilter = document.getElementById('transactionMonthFilter').value;
-            const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, paymentFilter, e.target.value);
+            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, e.target.value);
         });
 
         function deleteTransaction(id) {
@@ -1498,7 +1535,7 @@
                 transactions = transactions.filter(t => t.id !== id);
                 saveToCloud();
                 populateMonthFilters();
-                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentAccountFilter);
+                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
                 updateDashboard();
             }
         }
@@ -1679,6 +1716,30 @@
                 renderGoals();
             }
         }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Update button text and icon
+            document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            document.getElementById('themeText').textContent = newTheme === 'dark' ? 'Tema Claro' : 'Tema Escuro';
+        }
+
+        // Load saved theme on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'dark') {
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Tema Claro';
+            }
+        });
     </script>
 </body>
 </html>
