@@ -676,7 +676,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -806,7 +806,7 @@
                 </div>
 
                 <div style="margin-bottom: 2rem;">
-                    <div class="filter-grid" style="max-width: 600px;">
+                    <div class="filter-grid" style="max-width: 900px;">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>Filtrar por Mês</label>
                             <select id="dashboardMonthFilter" style="cursor: pointer;">
@@ -820,6 +820,28 @@
                                 <option value="Nubank">Nubank</option>
                                 <option value="Santander">Santander</option>
                                 <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Filtrar por Categoria</label>
+                            <select id="dashboardCategoryFilter" style="cursor: pointer;">
+                                <option value="">Todas as categorias</option>
+                                <optgroup label="Receitas">
+                                    <option value="Salário">Salário</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Investimentos">Investimentos</option>
+                                </optgroup>
+                                <optgroup label="Despesas">
+                                    <option value="Alimentação">Alimentação</option>
+                                    <option value="Moradia">Moradia</option>
+                                    <option value="Transporte">Transporte</option>
+                                    <option value="Saúde">Saúde</option>
+                                    <option value="Educação">Educação</option>
+                                    <option value="Lazer">Lazer</option>
+                                    <option value="Compras">Compras</option>
+                                    <option value="Contas">Contas</option>
+                                </optgroup>
+                                <option value="Outros">Outros</option>
                             </select>
                         </div>
                     </div>
@@ -956,34 +978,34 @@
                                     <option value="Pix">Pix</option>
                                 </select>
                             </div>
+                            <div>
+                                <label>Filtrar por Categoria</label>
+                                <select id="categoryFilter" style="cursor: pointer;">
+                                    <option value="">Todas as categorias</option>
+                                    <optgroup label="Receitas">
+                                        <option value="Salário">Salário</option>
+                                        <option value="Freelance">Freelance</option>
+                                        <option value="Investimentos">Investimentos</option>
+                                    </optgroup>
+                                    <optgroup label="Despesas">
+                                        <option value="Alimentação">Alimentação</option>
+                                        <option value="Moradia">Moradia</option>
+                                        <option value="Transporte">Transporte</option>
+                                        <option value="Saúde">Saúde</option>
+                                        <option value="Educação">Educação</option>
+                                        <option value="Lazer">Lazer</option>
+                                        <option value="Compras">Compras</option>
+                                        <option value="Contas">Contas</option>
+                                    </optgroup>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="tabs">
                             <button class="tab active" data-filter="all">Todas</button>
                             <button class="tab" data-filter="income">Receitas</button>
                             <button class="tab" data-filter="expense">Despesas</button>
-                        </div>
-                        <div class="form-group" id="categoryFilterContainer" style="margin-bottom: 1.5rem; display: none;">
-                            <label>Filtrar por Categoria</label>
-                            <select id="categoryFilter" style="cursor: pointer;">
-                                <option value="">Todas as categorias</option>
-                                <optgroup label="Receitas" id="incomeCategories">
-                                    <option value="Salário">Salário</option>
-                                    <option value="Freelance">Freelance</option>
-                                    <option value="Investimentos">Investimentos</option>
-                                </optgroup>
-                                <optgroup label="Despesas" id="expenseCategories">
-                                    <option value="Alimentação">Alimentação</option>
-                                    <option value="Moradia">Moradia</option>
-                                    <option value="Transporte">Transporte</option>
-                                    <option value="Saúde">Saúde</option>
-                                    <option value="Educação">Educação</option>
-                                    <option value="Lazer">Lazer</option>
-                                    <option value="Compras">Compras</option>
-                                    <option value="Contas">Contas</option>
-                                </optgroup>
-                                <option value="Outros">Outros</option>
-                            </select>
                         </div>
                         <div class="transaction-list" id="allTransactions"></div>
                     </div>
@@ -1300,7 +1322,7 @@
             });
         }
 
-        function calculateTotals(monthFilter = 'all', paymentFilter = '') {
+        function calculateTotals(monthFilter = 'all', paymentFilter = '', categoryFilter = '') {
             let filteredTransactions = transactions;
             
             if (monthFilter !== 'all') {
@@ -1309,6 +1331,10 @@
 
             if (paymentFilter) {
                 filteredTransactions = filteredTransactions.filter(t => t.paymentMethod === paymentFilter);
+            }
+
+            if (categoryFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.category === categoryFilter);
             }
 
             const income = filteredTransactions
@@ -1328,7 +1354,8 @@
         function updateDashboard() {
             const monthFilter = document.getElementById('dashboardMonthFilter').value;
             const paymentFilter = document.getElementById('dashboardPaymentFilter').value;
-            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter, paymentFilter);
+            const categoryFilter = document.getElementById('dashboardCategoryFilter').value;
+            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter, paymentFilter, categoryFilter);
 
             document.getElementById('dashIncome').textContent = formatCurrency(income);
             document.getElementById('dashExpense').textContent = formatCurrency(expense);
@@ -1341,6 +1368,9 @@
             }
             if (paymentFilter) {
                 filteredTransactions = filteredTransactions.filter(t => t.paymentMethod === paymentFilter);
+            }
+            if (categoryFilter) {
+                filteredTransactions = filteredTransactions.filter(t => t.category === categoryFilter);
             }
 
             const recent = [...filteredTransactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
@@ -1496,30 +1526,11 @@
                 tab.classList.add('active');
                 
                 const filterType = tab.dataset.filter;
-                const categoryFilterContainer = document.getElementById('categoryFilterContainer');
-                const categoryFilter = document.getElementById('categoryFilter');
+                const categoryFilter = document.getElementById('categoryFilter').value;
                 const monthFilter = document.getElementById('transactionMonthFilter').value;
                 const paymentFilter = document.getElementById('paymentMethodFilter').value;
-                const incomeCategories = document.getElementById('incomeCategories');
-                const expenseCategories = document.getElementById('expenseCategories');
                 
-                if (filterType === 'all') {
-                    categoryFilterContainer.style.display = 'none';
-                    categoryFilter.value = '';
-                } else {
-                    categoryFilterContainer.style.display = 'block';
-                    categoryFilter.value = '';
-                    
-                    if (filterType === 'income') {
-                        incomeCategories.style.display = '';
-                        expenseCategories.style.display = 'none';
-                    } else if (filterType === 'expense') {
-                        incomeCategories.style.display = 'none';
-                        expenseCategories.style.display = '';
-                    }
-                }
-                
-                renderTransactions(filterType, categoryFilter.value, monthFilter, paymentFilter);
+                renderTransactions(filterType, categoryFilter, monthFilter, paymentFilter);
             });
         });
 
@@ -1534,6 +1545,10 @@
         });
 
         document.getElementById('dashboardPaymentFilter').addEventListener('change', () => {
+            updateDashboard();
+        });
+
+        document.getElementById('dashboardCategoryFilter').addEventListener('change', () => {
             updateDashboard();
         });
 
