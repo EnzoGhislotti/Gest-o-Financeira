@@ -639,6 +639,17 @@
             border-left: 4px solid var(--danger);
         }
 
+        .alert-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+        }
+
         .alert-content {
             flex: 1;
         }
@@ -715,27 +726,77 @@
     <div id="setupScreen" class="setup-screen">
         <div class="setup-card">
             <h1 class="setup-title">💰 Gestor Financeiro</h1>
-            <p class="setup-subtitle">Sincronize seus dados na nuvem</p>
+            <p class="setup-subtitle">Seus dados protegidos com segurança</p>
 
             <div class="info-box">
-                <strong>📱 Multi-dispositivo:</strong> Seus dados ficarão salvos na nuvem e sincronizados automaticamente entre todos os seus dispositivos!
+                <strong>🔐 Seguro e Sincronizado:</strong> Seus dados são protegidos por senha e sincronizados automaticamente entre todos os seus dispositivos!
             </div>
 
-            <div class="form-group">
-                <label>Seu E-mail (identificador único)</label>
-                <input type="email" id="userEmail" placeholder="seu@email.com" required>
-                <p style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.5rem;">
-                    Use o mesmo e-mail em todos os dispositivos para acessar seus dados
+            <div class="tabs" style="border-bottom: 2px solid var(--border); margin-bottom: 1.5rem;">
+                <button class="tab active" onclick="switchAuthTab('login')" style="flex: 1;">Entrar</button>
+                <button class="tab" onclick="switchAuthTab('register')" style="flex: 1;">Criar Conta</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="loginPassword" placeholder="Sua senha" required>
+                </div>
+
+                <button class="btn btn-primary" onclick="loginUser()">
+                    Entrar
+                </button>
+
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    Não tem conta? <a href="#" onclick="switchAuthTab('register'); return false;" style="color: var(--primary); font-weight: 600;">Criar agora</a>
                 </p>
             </div>
 
-            <button class="btn btn-primary" onclick="setupUser()">
-                Começar a Usar
-            </button>
+            <!-- Register Form -->
+            <div id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="registerEmail" placeholder="seu@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres" required>
+                    <p style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 0.25rem;">
+                        Mínimo de 6 caracteres
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <input type="password" id="registerPasswordConfirm" placeholder="Digite a senha novamente" required>
+                </div>
+
+                <button class="btn btn-primary" onclick="registerUser()">
+                    Criar Conta
+                </button>
+
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    Já tem conta? <a href="#" onclick="switchAuthTab('login'); return false;" style="color: var(--primary); font-weight: 600;">Entrar</a>
+                </p>
+            </div>
 
             <div id="setupLoading" class="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>Carregando seus dados...</p>
+                <p id="loadingText">Carregando seus dados...</p>
+            </div>
+
+            <div id="errorMessage" class="alert alert-danger" style="display: none; margin-top: 1rem;">
+                <div class="alert-content">
+                    <div class="alert-title">Erro</div>
+                    <div id="errorText"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1135,6 +1196,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
     <script>
         // Firebase Configuration
@@ -1148,8 +1210,9 @@
             appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
         };
 
-        let app, database;
+        let app, database, auth;
         let currentUserEmail = '';
+        let currentUserId = '';
         let userDataRef = null;
 
         let transactions = [];
@@ -1157,55 +1220,175 @@
         let goals = [];
 
         const today = new Date().toISOString().split('T')[0];
-        
-        function setupUser() {
-            const email = document.getElementById('userEmail').value.trim();
-            if (!email || !email.includes('@')) {
-                alert('Por favor, insira um e-mail válido');
-                return;
-            }
 
-            document.getElementById('setupLoading').style.display = 'block';
-            currentUserEmail = email;
+        // Initialize Firebase
+        app = firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        auth = firebase.auth();
 
-            const userKey = email.replace(/[.#$[\]]/g, '_');
+        // Auth Tab Switching
+        function switchAuthTab(tab) {
+            const loginTab = document.querySelectorAll('.tab')[0];
+            const registerTab = document.querySelectorAll('.tab')[1];
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const errorMessage = document.getElementById('errorMessage');
 
-            try {
-                app = firebase.initializeApp(firebaseConfig);
-                database = firebase.database();
-                userDataRef = database.ref('users/' + userKey);
+            errorMessage.style.display = 'none';
 
-                userDataRef.once('value').then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        transactions = data.transactions || [];
-                        budgets = data.budgets || [];
-                        goals = data.goals || [];
-                    }
-
-                    document.getElementById('setupScreen').style.display = 'none';
-                    document.getElementById('appContainer').classList.add('active');
-                    document.getElementById('currentUser').textContent = currentUserEmail;
-                    document.getElementById('transDate').value = today;
-
-                    setupRealtimeSync();
-                    updateDashboard();
-                    populateMonthFilters();
-
-                }).catch((error) => {
-                    console.error('Erro ao carregar dados:', error);
-                    alert('Erro ao conectar. Verifique sua conexão com a internet.');
-                    document.getElementById('setupLoading').style.display = 'none';
-                });
-
-            } catch (error) {
-                console.error('Erro ao inicializar Firebase:', error);
-                alert('Erro de configuração. Por favor, configure o Firebase corretamente.');
-                document.getElementById('setupLoading').style.display = 'none';
+            if (tab === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.style.display = 'block';
+                loginForm.style.display = 'none';
             }
         }
 
+        // Show Error Message
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.style.display = 'flex';
+            document.getElementById('setupLoading').style.display = 'none';
+        }
+
+        // Register New User
+        function registerUser() {
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+            if (!email || !password || !passwordConfirm) {
+                showError('Por favor, preencha todos os campos');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showError('Por favor, insira um e-mail válido');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('A senha deve ter no mínimo 6 caracteres');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showError('As senhas não coincidem');
+                return;
+            }
+
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('setupLoading').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Criando sua conta...';
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    currentUserEmail = user.email;
+                    currentUserId = user.uid;
+                    loadUserData();
+                })
+                .catch((error) => {
+                    let errorMessage = 'Erro ao criar conta';
+                    
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage = 'Este e-mail já está cadastrado. Faça login.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'E-mail inválido';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'Senha muito fraca. Use no mínimo 6 caracteres.';
+                    }
+                    
+                    showError(errorMessage);
+                });
+        }
+
+        // Login User
+        function loginUser() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('Por favor, preencha e-mail e senha');
+                return;
+            }
+
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('setupLoading').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Entrando...';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    currentUserEmail = user.email;
+                    currentUserId = user.uid;
+                    loadUserData();
+                })
+                .catch((error) => {
+                    let errorMessage = 'Erro ao fazer login';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'Usuário não encontrado. Crie uma conta.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Senha incorreta';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'E-mail inválido';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
+                    }
+                    
+                    showError(errorMessage);
+                });
+        }
+
+        // Load User Data
+        function loadUserData() {
+            document.getElementById('loadingText').textContent = 'Carregando seus dados...';
+            
+            userDataRef = database.ref('users/' + currentUserId);
+
+            userDataRef.once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    transactions = data.transactions || [];
+                    budgets = data.budgets || [];
+                    goals = data.goals || [];
+                }
+
+                document.getElementById('setupScreen').style.display = 'none';
+                document.getElementById('appContainer').classList.add('active');
+                document.getElementById('currentUser').textContent = currentUserEmail;
+                document.getElementById('transDate').value = today;
+
+                setupRealtimeSync();
+                updateDashboard();
+                populateMonthFilters();
+
+            }).catch((error) => {
+                console.error('Erro ao carregar dados:', error);
+                showError('Erro ao carregar dados. Verifique sua conexão.');
+            });
+        }
+
+        // Check Auth State on Load
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUserEmail = user.email;
+                currentUserId = user.uid;
+                loadUserData();
+            }
+        });
+
         function setupRealtimeSync() {
+            userDataRef = database.ref('users/' + currentUserId);
+            
             userDataRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -1235,7 +1418,12 @@
 
         function logout() {
             if (confirm('Deseja sair? Seus dados estão salvos na nuvem.')) {
-                location.reload();
+                auth.signOut().then(() => {
+                    location.reload();
+                }).catch((error) => {
+                    console.error('Erro ao sair:', error);
+                    alert('Erro ao sair. Tente novamente.');
+                });
             }
         }
 
