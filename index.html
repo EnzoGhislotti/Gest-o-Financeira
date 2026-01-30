@@ -941,9 +941,8 @@
                             <label>Forma de Pagamento</label>
                             <select id="dashboardPaymentFilter" style="cursor: pointer;">
                                 <option value="">Todas</option>
-                                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                                <option value="Cartão de Débito">Cartão de Débito</option>
-                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Nubank">Nubank</option>
+                                <option value="Santander">Santander</option>
                                 <option value="Pix">Pix</option>
                             </select>
                         </div>
@@ -1060,16 +1059,11 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Nome do Banco</label>
-                                <input type="text" id="transBank" placeholder="Ex: Nubank, Santander, Itaú..." required>
-                            </div>
-                            <div class="form-group">
                                 <label>Forma de Pagamento</label>
                                 <select id="transPaymentMethod" required>
                                     <option value="">Selecione...</option>
-                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                                    <option value="Cartão de Débito">Cartão de Débito</option>
-                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Nubank">Nubank</option>
+                                    <option value="Santander">Santander</option>
                                     <option value="Pix">Pix</option>
                                 </select>
                             </div>
@@ -1103,9 +1097,8 @@
                                 <label>Forma de Pagamento</label>
                                 <select id="paymentMethodFilter" style="cursor: pointer;">
                                     <option value="">Todas</option>
-                                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                                    <option value="Cartão de Débito">Cartão de Débito</option>
-                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Nubank">Nubank</option>
+                                    <option value="Santander">Santander</option>
                                     <option value="Pix">Pix</option>
                                 </select>
                             </div>
@@ -1130,10 +1123,6 @@
                                     </optgroup>
                                     <option value="Outros">Outros</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label>Nome do Banco</label>
-                                <input type="text" id="bankFilter" placeholder="Ex: Nubank, Itaú..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: 'Work Sans', sans-serif; font-size: 1rem;">
                             </div>
                         </div>
 
@@ -1270,14 +1259,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
-            authDomain: "financas-5c7b4.firebaseapp.com",
-            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-            projectId: "financas-5c7b4",
-            storageBucket: "financas-5c7b4.firebasestorage.app",
-            messagingSenderId: "598951471840",
-            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
-        };
+  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
+  authDomain: "financas-5c7b4.firebaseapp.com",
+  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+  projectId: "financas-5c7b4",
+  storageBucket: "financas-5c7b4.firebasestorage.app",
+  messagingSenderId: "598951471840",
+  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
+};
 
         let app, database, auth;
         let currentUserEmail = '';
@@ -1558,7 +1547,7 @@
                     
                     const activePage = document.querySelector('.nav-link.active').dataset.page;
                     if (activePage === 'dashboard') updateDashboard();
-                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentBankFilter);
+                    if (activePage === 'transactions') renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
                     if (activePage === 'budget') renderBudgets();
                     if (activePage === 'goals') renderGoals();
                 }
@@ -1801,7 +1790,6 @@
                 description: document.getElementById('transDesc').value,
                 amount: parseFloat(document.getElementById('transAmount').value),
                 category: document.getElementById('transCategory').value,
-                bank: document.getElementById('transBank').value,
                 paymentMethod: document.getElementById('transPaymentMethod').value,
                 date: document.getElementById('transDate').value,
                 notes: document.getElementById('transNotes').value
@@ -1814,7 +1802,7 @@
             document.getElementById('transDate').value = today;
             
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentBankFilter);
+            renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
             updateDashboard();
         });
 
@@ -1823,14 +1811,12 @@
         let currentCategoryFilter = '';
         let currentMonthFilter = 'all';
         let currentPaymentFilter = '';
-        let currentBankFilter = '';
 
-        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all', paymentFilter = '', bankFilter = '') {
+        function renderTransactions(typeFilter = 'all', categoryFilter = '', monthFilter = 'all', paymentFilter = '') {
             currentTypeFilter = typeFilter;
             currentCategoryFilter = categoryFilter;
             currentMonthFilter = monthFilter;
             currentPaymentFilter = paymentFilter;
-            currentBankFilter = bankFilter;
 
             let filtered = transactions;
 
@@ -1850,10 +1836,6 @@
                 filtered = filtered.filter(t => t.paymentMethod === paymentFilter);
             }
 
-            if (bankFilter) {
-                filtered = filtered.filter(t => t.bank && t.bank.toLowerCase().includes(bankFilter.toLowerCase()));
-            }
-
             const sorted = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
             const listEl = document.getElementById('allTransactions');
 
@@ -1869,7 +1851,7 @@
                     </div>
                     <div class="transaction-details">
                         <div class="transaction-desc">${t.description}</div>
-                        <div class="transaction-meta">${t.category} • ${t.bank || 'N/A'} • ${t.paymentMethod || 'N/A'} • ${formatDate(t.date)}${t.notes ? ' • ' + t.notes : ''}</div>
+                        <div class="transaction-meta">${t.category} • ${formatDate(t.date)}${t.notes ? ' • ' + t.notes : ''}</div>
                     </div>
                     <div class="transaction-amount ${t.type}">
                         ${t.type === 'income' ? '+ ' : '- '}${formatCurrency(t.amount)}
@@ -1889,17 +1871,15 @@
                 const categoryFilter = document.getElementById('categoryFilter').value;
                 const monthFilter = document.getElementById('transactionMonthFilter').value;
                 const paymentFilter = document.getElementById('paymentMethodFilter').value;
-                const bankFilter = document.getElementById('bankFilter').value;
                 
-                renderTransactions(filterType, categoryFilter, monthFilter, paymentFilter, bankFilter);
+                renderTransactions(filterType, categoryFilter, monthFilter, paymentFilter);
             });
         });
 
         document.getElementById('categoryFilter').addEventListener('change', (e) => {
             const monthFilter = document.getElementById('transactionMonthFilter').value;
             const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            const bankFilter = document.getElementById('bankFilter').value;
-            renderTransactions(currentTypeFilter, e.target.value, monthFilter, paymentFilter, bankFilter);
+            renderTransactions(currentTypeFilter, e.target.value, monthFilter, paymentFilter);
         });
 
         document.getElementById('dashboardMonthFilter').addEventListener('change', () => {
@@ -1917,23 +1897,14 @@
         document.getElementById('transactionMonthFilter').addEventListener('change', (e) => {
             const categoryFilter = document.getElementById('categoryFilter').value;
             const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            const bankFilter = document.getElementById('bankFilter').value;
             populateMonthFilters();
-            renderTransactions(currentTypeFilter, categoryFilter, e.target.value, paymentFilter, bankFilter);
+            renderTransactions(currentTypeFilter, categoryFilter, e.target.value, paymentFilter);
         });
 
         document.getElementById('paymentMethodFilter').addEventListener('change', (e) => {
             const categoryFilter = document.getElementById('categoryFilter').value;
             const monthFilter = document.getElementById('transactionMonthFilter').value;
-            const bankFilter = document.getElementById('bankFilter').value;
-            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, e.target.value, bankFilter);
-        });
-
-        document.getElementById('bankFilter').addEventListener('input', (e) => {
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            const monthFilter = document.getElementById('transactionMonthFilter').value;
-            const paymentFilter = document.getElementById('paymentMethodFilter').value;
-            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, paymentFilter, e.target.value);
+            renderTransactions(currentTypeFilter, categoryFilter, monthFilter, e.target.value);
         });
 
         function deleteTransaction(id) {
@@ -1941,7 +1912,7 @@
                 transactions = transactions.filter(t => t.id !== id);
                 saveToCloud();
                 populateMonthFilters();
-                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentBankFilter);
+                renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter);
                 updateDashboard();
             }
         }
