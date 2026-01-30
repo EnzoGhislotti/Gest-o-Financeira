@@ -650,6 +650,17 @@
             gap: 0.5rem;
         }
 
+        .alert-success {
+            background: var(--success-light);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+        }
+
         .alert-content {
             flex: 1;
         }
@@ -749,6 +760,12 @@
                     <input type="password" id="loginPassword" placeholder="Sua senha" required>
                 </div>
 
+                <p style="text-align: right; margin-bottom: 1rem;">
+                    <a href="#" onclick="showForgotPassword(); return false;" style="color: var(--primary); font-size: 0.875rem; text-decoration: none;">
+                        Esqueceu a senha?
+                    </a>
+                </p>
+
                 <button class="btn btn-primary" onclick="loginUser()">
                     Entrar
                 </button>
@@ -770,6 +787,33 @@
                 <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
                     Não tem conta? <a href="#" onclick="switchAuthTab('register'); return false;" style="color: var(--primary); font-weight: 600;">Criar agora</a>
                 </p>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="forgotPasswordForm" style="display: none;">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Digite seu e-mail e enviaremos um link para redefinir sua senha.
+                </p>
+
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="forgotPasswordEmail" placeholder="seu@email.com" required>
+                </div>
+
+                <button class="btn btn-primary" onclick="sendPasswordReset()">
+                    Enviar Link de Recuperação
+                </button>
+
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    <a href="#" onclick="showLoginForm(); return false;" style="color: var(--primary); font-weight: 600;">← Voltar para login</a>
+                </p>
+
+                <div id="resetSuccess" class="alert alert-success" style="display: none; margin-top: 1rem;">
+                    <div class="alert-content">
+                        <div class="alert-title">E-mail Enviado!</div>
+                        <div>Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Register Form -->
@@ -1387,6 +1431,66 @@
                         errorMessage = 'Login cancelado';
                     } else if (error.code === 'auth/popup-blocked') {
                         errorMessage = 'Pop-up bloqueado. Permita pop-ups para este site.';
+                    }
+                    
+                    showError(errorMessage);
+                });
+        }
+
+        // Show Forgot Password Form
+        function showForgotPassword() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('resetSuccess').style.display = 'none';
+        }
+
+        // Show Login Form
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Reset tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+        }
+
+        // Send Password Reset Email
+        function sendPasswordReset() {
+            const email = document.getElementById('forgotPasswordEmail').value.trim();
+
+            if (!email) {
+                showError('Por favor, digite seu e-mail');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showError('Por favor, insira um e-mail válido');
+                return;
+            }
+
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('setupLoading').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Enviando e-mail...';
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    document.getElementById('setupLoading').style.display = 'none';
+                    document.getElementById('resetSuccess').style.display = 'flex';
+                })
+                .catch((error) => {
+                    let errorMessage = 'Erro ao enviar e-mail de recuperação';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'E-mail não encontrado. Verifique o endereço.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'E-mail inválido';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
                     }
                     
                     showError(errorMessage);
