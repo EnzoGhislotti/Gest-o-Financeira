@@ -966,7 +966,6 @@
                                     <option value="Compras">Compras</option>
                                     <option value="Contas">Contas</option>
                                 </optgroup>
-                                <option value="Outros">Outros</option>
                             </select>
                         </div>
                     </div>
@@ -1002,9 +1001,18 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h2 class="card-title">Gastos por Meio de Pagamento</h2>
+                            <h2 class="card-title">Gastos por Forma de Pagamento</h2>
                         </div>
                         <div id="dashPaymentMethods"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Gastos por Banco</h2>
+                        </div>
+                        <div id="dashBanks"></div>
                     </div>
                 </div>
             </div>
@@ -1128,7 +1136,6 @@
                                         <option value="Compras">Compras</option>
                                         <option value="Contas">Contas</option>
                                     </optgroup>
-                                    <option value="Outros">Outros</option>
                                 </select>
                             </div>
                             <div>
@@ -1270,14 +1277,15 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
-  authDomain: "financas-5c7b4.firebaseapp.com",
-  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-  projectId: "financas-5c7b4",
-  storageBucket: "financas-5c7b4.firebasestorage.app",
-  messagingSenderId: "598951471840",
-  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
-};
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
+
         let app, database, auth;
         let currentUserEmail = '';
         let currentUserId = '';
@@ -1747,8 +1755,8 @@
                 `).join('');
             }
 
-            // Payment Methods Summary - Always show in order: Nubank, Santander, Pix
-            const paymentOrder = ['Nubank', 'Santander', 'Pix'];
+            // Payment Methods Summary
+            const paymentOrder = ['Cartão de Crédito', 'Cartão de Débito', 'Dinheiro', 'Pix'];
             const paymentMethods = {};
             
             // Initialize with 0
@@ -1785,6 +1793,36 @@
                         </div>
                     `;
                 }).join('');
+            }
+
+            // Banks Summary
+            const banks = {};
+            filteredTransactions.filter(t => t.type === 'expense' && t.bank).forEach(t => {
+                const bank = t.bank;
+                banks[bank] = (banks[bank] || 0) + t.amount;
+            });
+
+            const dashBanksEl = document.getElementById('dashBanks');
+            
+            if (Object.keys(banks).length === 0) {
+                dashBanksEl.innerHTML = '<div class="empty-state"><p>Nenhuma despesa registrada</p></div>';
+            } else {
+                dashBanksEl.innerHTML = Object.entries(banks)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([bank, amount]) => {
+                        const percentage = totalExpenseFiltered > 0 ? (amount / totalExpenseFiltered * 100).toFixed(1) : 0;
+                        return `
+                            <div class="budget-item">
+                                <div class="budget-header">
+                                    <span class="budget-name">${bank}</span>
+                                    <span class="budget-amount">${formatCurrency(amount)} (${percentage}%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
             }
 
             populateMonthFilters();
@@ -2093,7 +2131,7 @@
                             <button class="btn btn-sm btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white;">
                                 Atualizar Progresso
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteGoal(${goal.id})">
+                            <button class="btn btn-danger" onclick="deleteGoal(${goal.id})" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
                                 Excluir
                             </button>
                         </div>
