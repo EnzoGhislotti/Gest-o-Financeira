@@ -180,6 +180,12 @@
             border-radius: 6px;
         }
 
+        .goal-delete-btn {
+            padding: 0.65rem 1.75rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+        }
+
         .info-box {
             background: rgba(37, 99, 235, 0.1);
             padding: 1rem;
@@ -1038,6 +1044,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="goals">
+                            <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            Metas
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#" class="nav-link" data-page="insights">
                             <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -1045,15 +1060,6 @@
                                 <path d="M12 8h.01"></path>
                             </svg>
                             Insights
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-page="goals">
-                            <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
-                            Metas
                         </a>
                     </li>
                 </ul>
@@ -1458,14 +1464,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
-  authDomain: "financas-5c7b4.firebaseapp.com",
-  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-  projectId: "financas-5c7b4",
-  storageBucket: "financas-5c7b4.firebasestorage.app",
-  messagingSenderId: "598951471840",
-  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
-};
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
 
         let app, database, auth;
         let currentUserEmail = '';
@@ -2119,6 +2125,10 @@
             const activeInstallmentsEl = document.getElementById('activeInstallments');
             const installmentsCard = document.getElementById('installmentsCard');
             
+            // Get current filters
+            const monthFilter = document.getElementById('dashboardMonthFilter').value;
+            const yearFilter = document.getElementById('dashboardYearFilter').value;
+            
             // Group installments by parent ID
             const installmentGroups = {};
             transactions.filter(t => t.isInstallment).forEach(t => {
@@ -2128,10 +2138,32 @@
                 installmentGroups[t.installmentParentId].push(t);
             });
 
-            const activeGroups = Object.values(installmentGroups).filter(group => {
+            // Filter groups based on month/year filter
+            let activeGroups = Object.values(installmentGroups);
+            
+            if (monthFilter !== 'all') {
+                // Filter to only show groups that have installments in the selected month
+                activeGroups = activeGroups.filter(group => {
+                    return group.some(t => {
+                        const transDate = t.date;
+                        return transDate.startsWith(monthFilter);
+                    });
+                });
+            } else if (yearFilter) {
+                // If no month selected but year is, show groups with installments in that year
+                activeGroups = activeGroups.filter(group => {
+                    return group.some(t => {
+                        const transYear = new Date(t.date).getFullYear();
+                        return transYear === parseInt(yearFilter);
+                    });
+                });
+            } else {
+                // No filters: show only groups with future installments
                 const today = new Date();
-                return group.some(t => new Date(t.date) >= today);
-            });
+                activeGroups = activeGroups.filter(group => {
+                    return group.some(t => new Date(t.date) >= today);
+                });
+            }
 
             if (activeGroups.length === 0) {
                 installmentsCard.style.display = 'none';
@@ -2144,11 +2176,34 @@
                 const sorted = group.sort((a, b) => a.installmentNumber - b.installmentNumber);
                 const first = sorted[0];
                 const today = new Date();
-                const paid = sorted.filter(t => new Date(t.date) < today).length;
+                
+                // Calculate paid based on current date or filter
+                let paid;
+                if (monthFilter !== 'all') {
+                    // Count how many installments are before or in the filtered month
+                    const [filterYear, filterMonth] = monthFilter.split('-');
+                    const filterDate = new Date(parseInt(filterYear), parseInt(filterMonth) - 1, 1);
+                    paid = sorted.filter(t => {
+                        const tDate = new Date(t.date);
+                        return tDate < filterDate || t.date.startsWith(monthFilter);
+                    }).length;
+                } else {
+                    paid = sorted.filter(t => new Date(t.date) < today).length;
+                }
+                
                 const percentage = (paid / first.installmentTotal * 100).toFixed(0);
                 const remaining = first.installmentTotal - paid;
                 const remainingAmount = remaining * first.amount;
-                const nextInstallment = sorted.find(t => new Date(t.date) >= today);
+                
+                // Find next installment relative to filter or today
+                let nextInstallment;
+                if (monthFilter !== 'all') {
+                    const [filterYear, filterMonth] = monthFilter.split('-');
+                    const filterDate = new Date(parseInt(filterYear), parseInt(filterMonth) - 1, 1);
+                    nextInstallment = sorted.find(t => new Date(t.date) >= filterDate);
+                } else {
+                    nextInstallment = sorted.find(t => new Date(t.date) >= today);
+                }
 
                 return `
                     <div class="installment-item">
@@ -2725,10 +2780,10 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white; padding: 0.65rem 1.2rem;">
+                            <button class="btn btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white; padding: 0.75rem 1.2rem;">
                                 Atualizar Progresso
                             </button>
-                            <button class="btn btn-danger" onclick="deleteGoal(${goal.id})" style="padding: 0.65rem 1.75rem; font-size: 0.875rem;">
+                            <button class="btn btn-danger goal-delete-btn" onclick="deleteGoal(${goal.id})">
                                 Excluir
                             </button>
                         </div>
