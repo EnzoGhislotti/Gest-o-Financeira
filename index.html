@@ -1038,6 +1038,16 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="insights">
+                            <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                            </svg>
+                            Insights
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#" class="nav-link" data-page="goals">
                             <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -1123,15 +1133,6 @@
                         <div class="stat-label">Taxa de Poupança</div>
                         <div class="stat-value" id="savingsRate">0%</div>
                     </div>
-                </div>
-
-                <!-- Insights Section -->
-                <div id="insightsSection" class="card" style="margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <h2 class="card-title">💡 Insights Financeiros</h2>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Análise inteligente baseada no seu comportamento financeiro</p>
-                    </div>
-                    <div id="insightsContent"></div>
                 </div>
 
                 <!-- Active Installments Card -->
@@ -1382,6 +1383,16 @@
                 </div>
             </div>
 
+            <!-- Insights Page -->
+            <div id="insights-page" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">💡 Insights Financeiros</h1>
+                    <p class="page-subtitle">Análise inteligente baseada no seu comportamento financeiro</p>
+                </div>
+
+                <div id="insightsContent" class="insights-container"></div>
+            </div>
+
             <!-- Goals Page -->
             <div id="goals-page" class="page" style="display: none;">
                 <div class="page-header">
@@ -1447,14 +1458,15 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
-  authDomain: "financas-5c7b4.firebaseapp.com",
-  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-  projectId: "financas-5c7b4",
-  storageBucket: "financas-5c7b4.firebasestorage.app",
-  messagingSenderId: "598951471840",
-  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
-};
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
+
         let app, database, auth;
         let currentUserEmail = '';
         let currentUserId = '';
@@ -1783,7 +1795,13 @@
             if (page === 'dashboard') updateDashboard();
             if (page === 'transactions') renderTransactions();
             if (page === 'budget') renderBudgets();
+            if (page === 'insights') updateInsights();
             if (page === 'goals') renderGoals();
+        }
+
+        function updateInsights() {
+            const { income, expense, balance, savingsRate } = calculateTotals('all', '', '', '');
+            generateInsights(income, expense, balance, parseFloat(savingsRate), transactions);
         }
 
         function formatCurrency(value) {
@@ -1803,21 +1821,49 @@
         }
 
         function populateMonthFilters() {
-            if (transactions.length === 0) return;
+            const currentYear = new Date().getFullYear();
+            const monthNames = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
 
-            const months = new Set();
+            // Generate all 12 months for current year
+            const allMonths = [];
+            for (let i = 0; i < 12; i++) {
+                const monthValue = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                allMonths.push({
+                    value: monthValue,
+                    label: `${monthNames[i]} de ${currentYear}`
+                });
+            }
+
+            // Also add months from transactions from other years
+            const additionalMonths = new Set();
             transactions.forEach(t => {
                 const date = new Date(t.date + 'T00:00:00');
-                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                months.add(monthYear);
+                const year = date.getFullYear();
+                if (year !== currentYear) {
+                    const monthYear = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    additionalMonths.add(monthYear);
+                }
             });
 
-            const sortedMonths = Array.from(months).sort().reverse();
+            const sortedAdditionalMonths = Array.from(additionalMonths).sort().reverse();
 
             const dashFilter = document.getElementById('dashboardMonthFilter');
             const currentDashValue = dashFilter.value;
             dashFilter.innerHTML = '<option value="all">Todos os meses</option>';
-            sortedMonths.forEach(month => {
+            
+            // Add all 12 months of current year
+            allMonths.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month.value;
+                option.textContent = month.label;
+                dashFilter.appendChild(option);
+            });
+
+            // Add months from other years
+            sortedAdditionalMonths.forEach(month => {
                 const [year, monthNum] = month.split('-');
                 const date = new Date(year, monthNum - 1);
                 const monthName = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -1831,7 +1877,17 @@
             const transFilter = document.getElementById('transactionMonthFilter');
             const currentTransValue = transFilter.value;
             transFilter.innerHTML = '<option value="all">Todos os meses</option>';
-            sortedMonths.forEach(month => {
+            
+            // Add all 12 months of current year
+            allMonths.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month.value;
+                option.textContent = month.label;
+                transFilter.appendChild(option);
+            });
+
+            // Add months from other years
+            sortedAdditionalMonths.forEach(month => {
                 const [year, monthNum] = month.split('-');
                 const date = new Date(year, monthNum - 1);
                 const monthName = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -2279,7 +2335,6 @@
             populateMonthFilters();
             renderActiveInstallments();
             populateYearFilter();
-            generateInsights(income, expense, balance, parseFloat(savingsRate), filteredTransactions);
         }
 
         // Installment Toggle and Preview
