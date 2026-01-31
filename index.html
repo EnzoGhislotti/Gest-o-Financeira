@@ -661,6 +661,136 @@
             gap: 0.5rem;
         }
 
+        .insight-card {
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            display: flex;
+            gap: 1rem;
+            align-items: start;
+            transition: all 0.2s;
+        }
+
+        .insight-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .insight-card.success {
+            background: var(--success-light);
+            border-left-color: var(--success);
+        }
+
+        .insight-card.warning {
+            background: var(--warning-light);
+            border-left-color: var(--warning);
+        }
+
+        .insight-card.info {
+            background: rgba(37, 99, 235, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .insight-card.danger {
+            background: var(--danger-light);
+            border-left-color: var(--danger);
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .insight-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .installment-item {
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: var(--bg-secondary);
+        }
+
+        .installment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .installment-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .installment-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .installment-amount {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .installment-progress {
+            margin: 1rem 0;
+        }
+
+        .installment-progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .installment-dots {
+            display: flex;
+            gap: 0.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .installment-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .installment-dot.paid {
+            background: var(--success);
+        }
+
+        .installment-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
         .alert-content {
             flex: 1;
         }
@@ -930,11 +1060,16 @@
                 </div>
 
                 <div style="margin-bottom: 2rem;">
-                    <div class="filter-grid" style="max-width: 900px;">
+                    <div class="filter-grid" style="max-width: 1100px; grid-template-columns: repeat(4, 1fr);">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>Filtrar por Mês</label>
                             <select id="dashboardMonthFilter" style="cursor: pointer;">
                                 <option value="all">Todos os meses</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Ano</label>
+                            <select id="dashboardYearFilter" style="cursor: pointer;">
                             </select>
                         </div>
                         <div class="form-group" style="margin-bottom: 0;">
@@ -988,6 +1123,24 @@
                         <div class="stat-label">Taxa de Poupança</div>
                         <div class="stat-value" id="savingsRate">0%</div>
                     </div>
+                </div>
+
+                <!-- Insights Section -->
+                <div id="insightsSection" class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <h2 class="card-title">💡 Insights Financeiros</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Análise inteligente baseada no seu comportamento financeiro</p>
+                    </div>
+                    <div id="insightsContent"></div>
+                </div>
+
+                <!-- Active Installments Card -->
+                <div id="installmentsCard" class="card" style="margin-bottom: 2rem; display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title">💳 Parcelas Ativas</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Acompanhe suas compras parceladas</p>
+                    </div>
+                    <div id="activeInstallments"></div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
@@ -1064,6 +1217,7 @@
                                         <option value="Lazer">Lazer</option>
                                         <option value="Compras">Compras</option>
                                         <option value="Contas">Contas</option>
+                                        <option value="Outros">Outros</option>
                                     </optgroup>
                                 </select>
                             </div>
@@ -1084,6 +1238,22 @@
                             <div class="form-group">
                                 <label>Data</label>
                                 <input type="date" id="transDate" required>
+                            </div>
+                            <div class="form-group full-width" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <input type="checkbox" id="transInstallment" style="width: auto; margin: 0;">
+                                <label for="transInstallment" style="margin: 0; cursor: pointer;">Parcelar esta compra</label>
+                            </div>
+                            <div id="installmentFields" style="display: none;">
+                                <div class="form-group">
+                                    <label>Número de Parcelas</label>
+                                    <input type="number" id="transInstallments" min="2" max="48" placeholder="Ex: 12" value="2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data da Primeira Parcela</label>
+                                    <input type="date" id="transFirstInstallment">
+                                </div>
+                                <div id="installmentPreview" style="padding: 1rem; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 1rem;">
+                                </div>
                             </div>
                             <div class="form-group full-width">
                                 <label>Observações (opcional)</label>
@@ -1534,8 +1704,10 @@
                 document.getElementById('transDate').value = today;
 
                 setupRealtimeSync();
+                populateYearFilter();
                 updateDashboard();
                 populateMonthFilters();
+                renderActiveInstallments();
 
             }).catch((error) => {
                 console.error('Erro ao carregar dados:', error);
@@ -1681,8 +1853,15 @@
             });
         }
 
-        function calculateTotals(monthFilter = 'all', paymentFilter = '', categoryFilter = '') {
+        function calculateTotals(monthFilter = 'all', paymentFilter = '', categoryFilter = '', yearFilter = '') {
             let filteredTransactions = transactions;
+            
+            if (yearFilter) {
+                filteredTransactions = filteredTransactions.filter(t => {
+                    const transYear = new Date(t.date).getFullYear();
+                    return transYear === parseInt(yearFilter);
+                });
+            }
             
             if (monthFilter !== 'all') {
                 filteredTransactions = filterTransactionsByMonth(filteredTransactions, monthFilter);
@@ -1710,18 +1889,291 @@
             return { income, expense, balance, savingsRate };
         }
 
+        function generateInsights(income, expense, balance, savingsRate, transactions) {
+            const insightsEl = document.getElementById('insightsContent');
+            const insights = [];
+
+            // Calculate installments total
+            const monthlyInstallments = transactions
+                .filter(t => t.isInstallment && t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            // Insight 1: Savings Rate Analysis
+            if (income > 0) {
+                if (savingsRate >= 30) {
+                    insights.push({
+                        type: 'success',
+                        icon: '🎉',
+                        title: 'Excelente Taxa de Poupança!',
+                        text: `Parabéns! Você está poupando ${savingsRate.toFixed(1)}% da sua renda. Isso está acima da média recomendada de 20%. Continue assim!`
+                    });
+                } else if (savingsRate >= 20) {
+                    insights.push({
+                        type: 'success',
+                        icon: '✅',
+                        title: 'Boa Taxa de Poupança',
+                        text: `Você está poupando ${savingsRate.toFixed(1)}% da sua renda, o que está na faixa ideal de 20%. Mantenha esse ritmo!`
+                    });
+                } else if (savingsRate >= 10) {
+                    insights.push({
+                        type: 'warning',
+                        icon: '⚠️',
+                        title: 'Taxa de Poupança Abaixo do Ideal',
+                        text: `Sua taxa de poupança é de ${savingsRate.toFixed(1)}%. Tente aumentar para pelo menos 20% reduzindo algumas despesas não essenciais.`
+                    });
+                } else if (savingsRate > 0) {
+                    insights.push({
+                        type: 'warning',
+                        icon: '📊',
+                        title: 'Poupança Baixa',
+                        text: `Você está poupando apenas ${savingsRate.toFixed(1)}% da sua renda. Considere revisar seus gastos e estabelecer uma meta de poupança de 20%.`
+                    });
+                } else {
+                    insights.push({
+                        type: 'danger',
+                        icon: '🚨',
+                        title: 'Atenção: Sem Poupança',
+                        text: 'Suas despesas estão iguais ou maiores que sua renda. É fundamental criar uma reserva de emergência. Analise onde pode cortar gastos.'
+                    });
+                }
+            }
+
+            // Insight 2: Spending Categories Analysis
+            const expensesByCategory = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                expensesByCategory[t.category] = (expensesByCategory[t.category] || 0) + t.amount;
+            });
+
+            const topCategory = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1])[0];
+            if (topCategory && expense > 0) {
+                const percentage = (topCategory[1] / expense * 100).toFixed(1);
+                if (percentage >= 40) {
+                    insights.push({
+                        type: 'info',
+                        icon: '📍',
+                        title: `Maior Gasto: ${topCategory[0]}`,
+                        text: `${topCategory[0]} representa ${percentage}% das suas despesas (${formatCurrency(topCategory[1])}). Avalie se há oportunidades de redução nesta categoria.`
+                    });
+                }
+            }
+
+            // Insight 3: Budget vs Spending
+            if (budgets.length > 0) {
+                const overBudget = budgets.filter(b => {
+                    const spent = getSpentByCategory(b.category);
+                    return spent > b.limit;
+                });
+
+                if (overBudget.length > 0) {
+                    const categories = overBudget.map(b => b.category).join(', ');
+                    insights.push({
+                        type: 'danger',
+                        icon: '💸',
+                        title: 'Orçamento Ultrapassado',
+                        text: `Você ultrapassou o orçamento em: ${categories}. Revise seus gastos nestas categorias para voltar ao planejado.`
+                    });
+                }
+            }
+
+            // Insight 4: Emergency Fund Recommendation
+            const monthlyExpense = expense;
+            const emergencyFundGoal = monthlyExpense * 6;
+            if (balance > 0 && balance < emergencyFundGoal) {
+                const monthsNeeded = Math.ceil((emergencyFundGoal - balance) / (balance * (savingsRate / 100)));
+                if (savingsRate > 0) {
+                    insights.push({
+                        type: 'info',
+                        icon: '🛡️',
+                        title: 'Reserva de Emergência',
+                        text: `Recomenda-se ter 6 meses de despesas guardados (${formatCurrency(emergencyFundGoal)}). Continue poupando e você alcançará esse objetivo!`
+                    });
+                }
+            } else if (balance >= emergencyFundGoal) {
+                insights.push({
+                    type: 'success',
+                    icon: '🎯',
+                    title: 'Reserva de Emergência Completa!',
+                    text: `Parabéns! Você tem ${formatCurrency(balance)} guardado, o que cobre mais de 6 meses de despesas. Considere investir o excedente.`
+                });
+            }
+
+            // Insight 5: Payment Method Analysis
+            const paymentMethods = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                if (t.paymentMethod) {
+                    paymentMethods[t.paymentMethod] = (paymentMethods[t.paymentMethod] || 0) + t.amount;
+                }
+            });
+
+            const creditCardSpending = paymentMethods['Cartão de Crédito'] || 0;
+            if (creditCardSpending > expense * 0.5) {
+                const percentage = (creditCardSpending / expense * 100).toFixed(1);
+                insights.push({
+                    type: 'warning',
+                    icon: '💳',
+                    title: 'Alto Uso de Cartão de Crédito',
+                    text: `${percentage}% das suas despesas são no cartão de crédito (${formatCurrency(creditCardSpending)}). Fique atento ao pagamento integral da fatura para evitar juros.`
+                });
+            }
+
+            // Insight 6: Installments Analysis
+            if (monthlyInstallments > 0 && income > 0) {
+                const installmentPercentage = (monthlyInstallments / income * 100).toFixed(1);
+                if (installmentPercentage >= 30) {
+                    insights.push({
+                        type: 'danger',
+                        icon: '⚠️',
+                        title: 'Parcelas Comprometem Muito da Renda',
+                        text: `Você tem ${formatCurrency(monthlyInstallments)}/mês em parcelas (${installmentPercentage}% da renda). Evite novas compras parceladas até quitar algumas.`
+                    });
+                } else if (installmentPercentage >= 20) {
+                    insights.push({
+                        type: 'warning',
+                        icon: '💳',
+                        title: 'Atenção às Parcelas',
+                        text: `Suas parcelas representam ${installmentPercentage}% da renda (${formatCurrency(monthlyInstallments)}/mês). Fique atento ao comprometimento.`
+                    });
+                } else {
+                    insights.push({
+                        type: 'info',
+                        icon: '📊',
+                        title: 'Parcelas Sob Controle',
+                        text: `Você tem ${formatCurrency(monthlyInstallments)}/mês em parcelas (${installmentPercentage}% da renda). Está em um nível saudável!`
+                    });
+                }
+            }
+
+            // Render insights
+            if (insights.length === 0) {
+                insightsEl.innerHTML = '<div class="empty-state"><p>Adicione mais transações para receber insights personalizados sobre suas finanças.</p></div>';
+            } else {
+                insightsEl.innerHTML = insights.map(insight => `
+                    <div class="insight-card ${insight.type}">
+                        <div class="insight-icon">${insight.icon}</div>
+                        <div class="insight-content">
+                            <div class="insight-title">${insight.title}</div>
+                            <div class="insight-text">${insight.text}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderActiveInstallments() {
+            const activeInstallmentsEl = document.getElementById('activeInstallments');
+            const installmentsCard = document.getElementById('installmentsCard');
+            
+            // Group installments by parent ID
+            const installmentGroups = {};
+            transactions.filter(t => t.isInstallment).forEach(t => {
+                if (!installmentGroups[t.installmentParentId]) {
+                    installmentGroups[t.installmentParentId] = [];
+                }
+                installmentGroups[t.installmentParentId].push(t);
+            });
+
+            const activeGroups = Object.values(installmentGroups).filter(group => {
+                const today = new Date();
+                return group.some(t => new Date(t.date) >= today);
+            });
+
+            if (activeGroups.length === 0) {
+                installmentsCard.style.display = 'none';
+                return;
+            }
+
+            installmentsCard.style.display = 'block';
+
+            activeInstallmentsEl.innerHTML = activeGroups.map(group => {
+                const sorted = group.sort((a, b) => a.installmentNumber - b.installmentNumber);
+                const first = sorted[0];
+                const today = new Date();
+                const paid = sorted.filter(t => new Date(t.date) < today).length;
+                const percentage = (paid / first.installmentTotal * 100).toFixed(0);
+                const remaining = first.installmentTotal - paid;
+                const remainingAmount = remaining * first.amount;
+                const nextInstallment = sorted.find(t => new Date(t.date) >= today);
+
+                return `
+                    <div class="installment-item">
+                        <div class="installment-header">
+                            <div>
+                                <div class="installment-title">${first.description}</div>
+                                <div class="installment-subtitle">${first.bank} • ${first.paymentMethod}</div>
+                            </div>
+                            <div class="installment-amount">${formatCurrency(first.amount)}/mês</div>
+                        </div>
+                        <div class="installment-progress">
+                            <div class="installment-progress-text">
+                                <span>Paga ${paid}/${first.installmentTotal} parcelas</span>
+                                <span>${percentage}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="installment-dots">
+                                ${Array.from({length: first.installmentTotal}, (_, i) => 
+                                    `<div class="installment-dot ${i < paid ? 'paid' : ''}"></div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; font-size: 0.85rem;">
+                            <span style="color: var(--text-secondary);">
+                                Faltam ${formatCurrency(remainingAmount)}
+                            </span>
+                            ${nextInstallment ? `<span style="color: var(--primary); font-weight: 600;">
+                                Próxima: ${formatDate(nextInstallment.date)}
+                            </span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function populateYearFilter() {
+            const yearFilter = document.getElementById('dashboardYearFilter');
+            const years = new Set();
+            const currentYear = new Date().getFullYear();
+            
+            // Add current year and next 2 years
+            years.add(currentYear);
+            years.add(currentYear + 1);
+            years.add(currentYear + 2);
+            
+            // Add years from transactions
+            transactions.forEach(t => {
+                const year = new Date(t.date).getFullYear();
+                years.add(year);
+            });
+
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            yearFilter.innerHTML = sortedYears.map(year => 
+                `<option value="${year}" ${year === currentYear ? 'selected' : ''}>${year}</option>`
+            ).join('');
+        }
+
         function updateDashboard() {
             const monthFilter = document.getElementById('dashboardMonthFilter').value;
+            const yearFilter = document.getElementById('dashboardYearFilter').value;
             const paymentFilter = document.getElementById('dashboardPaymentFilter').value;
             const categoryFilter = document.getElementById('dashboardCategoryFilter').value;
-            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter, paymentFilter, categoryFilter);
+            
+            // Filter by year first
+            let filteredTransactions = transactions;
+            if (yearFilter) {
+                filteredTransactions = filteredTransactions.filter(t => {
+                    const transYear = new Date(t.date).getFullYear();
+                    return transYear === parseInt(yearFilter);
+                });
+            }
+            
+            const { income, expense, balance, savingsRate } = calculateTotals(monthFilter, paymentFilter, categoryFilter, yearFilter);
 
             document.getElementById('dashIncome').textContent = formatCurrency(income);
             document.getElementById('dashExpense').textContent = formatCurrency(expense);
             document.getElementById('dashBalance').textContent = formatCurrency(balance);
             document.getElementById('savingsRate').textContent = savingsRate + '%';
 
-            let filteredTransactions = transactions;
             if (monthFilter !== 'all') {
                 filteredTransactions = filterTransactionsByMonth(filteredTransactions, monthFilter);
             }
@@ -1825,29 +2277,113 @@
             }
 
             populateMonthFilters();
+            renderActiveInstallments();
+            populateYearFilter();
+            generateInsights(income, expense, balance, parseFloat(savingsRate), filteredTransactions);
         }
+
+        // Installment Toggle and Preview
+        document.getElementById('transInstallment').addEventListener('change', function() {
+            const installmentFields = document.getElementById('installmentFields');
+            const dateField = document.getElementById('transDate');
+            const firstInstallmentField = document.getElementById('transFirstInstallment');
+            
+            if (this.checked) {
+                installmentFields.style.display = 'block';
+                firstInstallmentField.value = dateField.value;
+            } else {
+                installmentFields.style.display = 'none';
+            }
+        });
+
+        function updateInstallmentPreview() {
+            const amount = parseFloat(document.getElementById('transAmount').value) || 0;
+            const installments = parseInt(document.getElementById('transInstallments').value) || 2;
+            const preview = document.getElementById('installmentPreview');
+            
+            if (amount > 0 && installments > 1) {
+                const installmentAmount = amount / installments;
+                preview.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                        ${installments}x de ${formatCurrency(installmentAmount)}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Total: ${formatCurrency(amount)}
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = '<div style="color: var(--text-secondary);">Preencha o valor e número de parcelas</div>';
+            }
+        }
+
+        document.getElementById('transAmount').addEventListener('input', updateInstallmentPreview);
+        document.getElementById('transInstallments').addEventListener('input', updateInstallmentPreview);
 
         // Transaction Form
         document.getElementById('transactionForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const transaction = {
-                id: Date.now(),
-                type: document.getElementById('transType').value,
-                description: document.getElementById('transDesc').value,
-                amount: parseFloat(document.getElementById('transAmount').value),
-                category: document.getElementById('transCategory').value,
-                bank: document.getElementById('transBank').value,
-                paymentMethod: document.getElementById('transPaymentMethod').value,
-                date: document.getElementById('transDate').value,
-                notes: document.getElementById('transNotes').value
-            };
+            const isInstallment = document.getElementById('transInstallment').checked;
+            const amount = parseFloat(document.getElementById('transAmount').value);
+            const description = document.getElementById('transDesc').value;
+            const type = document.getElementById('transType').value;
+            const category = document.getElementById('transCategory').value;
+            const bank = document.getElementById('transBank').value;
+            const paymentMethod = document.getElementById('transPaymentMethod').value;
+            const notes = document.getElementById('transNotes').value;
 
-            transactions.push(transaction);
+            if (isInstallment && type === 'expense') {
+                // Create installments
+                const installmentCount = parseInt(document.getElementById('transInstallments').value);
+                const firstDate = new Date(document.getElementById('transFirstInstallment').value);
+                const installmentAmount = amount / installmentCount;
+                const parentId = Date.now();
+
+                for (let i = 0; i < installmentCount; i++) {
+                    const installmentDate = new Date(firstDate);
+                    installmentDate.setMonth(installmentDate.getMonth() + i);
+                    
+                    const transaction = {
+                        id: parentId + i,
+                        type: type,
+                        description: description,
+                        amount: installmentAmount,
+                        category: category,
+                        bank: bank,
+                        paymentMethod: paymentMethod,
+                        date: installmentDate.toISOString().split('T')[0],
+                        notes: notes,
+                        isInstallment: true,
+                        installmentNumber: i + 1,
+                        installmentTotal: installmentCount,
+                        installmentParentId: parentId,
+                        installmentOriginalAmount: amount
+                    };
+                    
+                    transactions.push(transaction);
+                }
+            } else {
+                // Regular transaction
+                const transaction = {
+                    id: Date.now(),
+                    type: type,
+                    description: description,
+                    amount: amount,
+                    category: category,
+                    bank: bank,
+                    paymentMethod: paymentMethod,
+                    date: document.getElementById('transDate').value,
+                    notes: notes
+                };
+                
+                transactions.push(transaction);
+            }
+
             saveToCloud();
 
             e.target.reset();
             document.getElementById('transDate').value = today;
+            document.getElementById('installmentFields').style.display = 'none';
             
             populateMonthFilters();
             renderTransactions(currentTypeFilter, currentCategoryFilter, currentMonthFilter, currentPaymentFilter, currentBankFilter);
@@ -1904,7 +2440,10 @@
                         ${t.type === 'income' ? '↑' : '↓'}
                     </div>
                     <div class="transaction-details">
-                        <div class="transaction-desc">${t.description}</div>
+                        <div class="transaction-desc">
+                            ${t.description}
+                            ${t.isInstallment ? `<span class="installment-badge">${t.installmentNumber}/${t.installmentTotal}</span>` : ''}
+                        </div>
                         <div class="transaction-meta">${t.category} • ${t.bank || 'N/A'} • ${t.paymentMethod || 'N/A'} • ${formatDate(t.date)}${t.notes ? ' • ' + t.notes : ''}</div>
                     </div>
                     <div class="transaction-amount ${t.type}">
@@ -1947,6 +2486,10 @@
         });
 
         document.getElementById('dashboardCategoryFilter').addEventListener('change', () => {
+            updateDashboard();
+        });
+
+        document.getElementById('dashboardYearFilter').addEventListener('change', () => {
             updateDashboard();
         });
 
@@ -2127,10 +2670,10 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn btn-sm btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white;">
+                            <button class="btn btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white; padding: 0.65rem 1.2rem;">
                                 Atualizar Progresso
                             </button>
-                            <button class="btn btn-danger" onclick="deleteGoal(${goal.id})" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            <button class="btn btn-danger" onclick="deleteGoal(${goal.id})" style="padding: 0.65rem 1.75rem; font-size: 0.875rem;">
                                 Excluir
                             </button>
                         </div>
