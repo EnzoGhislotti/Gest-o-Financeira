@@ -181,7 +181,7 @@
         }
 
         .goal-delete-btn {
-            padding: 0.5rem 1.25rem;
+            padding: 0.6rem 1.5rem;
             font-size: 0.875rem;
             border-radius: 8px;
             font-weight: 600;
@@ -2780,8 +2780,8 @@
                                 Faltam ${formatCurrency(remaining)} para atingir sua meta
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                            <button class="btn btn-secondary" onclick="updateGoalProgress(${goal.id})" style="flex: 1; background: var(--success); color: white; padding: 0.75rem 1.2rem;">
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; justify-content: center;">
+                            <button class="btn btn-secondary" onclick="updateGoalProgress(${goal.id})" style="background: var(--success); color: white; padding: 0.6rem 1.5rem; font-weight: 600;">
                                 Atualizar Progresso
                             </button>
                             <button class="btn btn-danger goal-delete-btn" onclick="deleteGoal(${goal.id})">
