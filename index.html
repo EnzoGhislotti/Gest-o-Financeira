@@ -1646,15 +1646,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
-  authDomain: "financas-5c7b4.firebaseapp.com",
-  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-  projectId: "financas-5c7b4",
-  storageBucket: "financas-5c7b4.firebasestorage.app",
-  messagingSenderId: "598951471840",
-  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
-};
-
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
 
         let app, database, auth;
         let currentUserEmail = '';
@@ -2152,7 +2151,7 @@
             const today = new Date();
 
             let detailsHTML = `
-                <div style="max-height: 400px; overflow-y: auto;">
+                <div style="max-height: 500px; overflow-y: auto;">
                     <h3 style="margin-bottom: 1rem;">${sorted[0].description}</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -2161,20 +2160,32 @@
                                 <th style="text-align: left; padding: 0.75rem;">Vencimento</th>
                                 <th style="text-align: right; padding: 0.75rem;">Valor</th>
                                 <th style="text-align: center; padding: 0.75rem;">Status</th>
+                                <th style="text-align: center; padding: 0.75rem;">Ação</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${sorted.map(t => {
                                 const isPaid = new Date(t.date) < today;
                                 return `
-                                    <tr style="border-bottom: 1px solid var(--border);">
-                                        <td style="padding: 0.75rem;">${t.installmentNumber}/${t.installmentTotal}</td>
+                                    <tr style="border-bottom: 1px solid var(--border);" id="installment-row-${t.id}">
+                                        <td style="padding: 0.75rem; font-weight: 600;">${t.installmentNumber}/${t.installmentTotal}</td>
                                         <td style="padding: 0.75rem;">${formatDate(t.date)}</td>
-                                        <td style="text-align: right; padding: 0.75rem;">${formatCurrency(t.amount)}</td>
+                                        <td style="text-align: right; padding: 0.75rem; font-weight: 600;">${formatCurrency(t.amount)}</td>
                                         <td style="text-align: center; padding: 0.75rem;">
-                                            <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: ${isPaid ? 'var(--success-light)' : 'var(--warning-light)'}; color: ${isPaid ? 'var(--success)' : 'var(--warning)'};">
+                                            <span id="status-badge-${t.id}" style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: ${isPaid ? 'var(--success-light)' : 'var(--warning-light)'}; color: ${isPaid ? 'var(--success)' : 'var(--warning)'};">
                                                 ${isPaid ? '✓ Paga' : 'Pendente'}
                                             </span>
+                                        </td>
+                                        <td style="text-align: center; padding: 0.75rem;">
+                                            ${!isPaid ? `
+                                                <button onclick="markInstallmentAsPaid(${t.id}, ${parentId})" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: var(--success); color: white;">
+                                                    Marcar como Paga
+                                                </button>
+                                            ` : `
+                                                <button onclick="markInstallmentAsPending(${t.id}, ${parentId})" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                                                    Desfazer
+                                                </button>
+                                            `}
                                         </td>
                                     </tr>
                                 `;
@@ -2185,21 +2196,98 @@
             `;
 
             const modalBg = document.createElement('div');
+            modalBg.id = 'installment-modal';
             modalBg.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
             
             const modal = document.createElement('div');
-            modal.style.cssText = 'background: var(--bg-primary); border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);';
+            modal.style.cssText = 'background: var(--bg-primary); border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);';
             modal.innerHTML = detailsHTML + `
                 <div style="margin-top: 1.5rem; text-align: right;">
-                    <button class="btn btn-secondary" onclick="this.closest('[style*=fixed]').remove()" style="padding: 0.65rem 1.75rem;">
+                    <button class="btn btn-secondary" onclick="document.getElementById('installment-modal').remove(); renderInstallmentsPage();" style="padding: 0.65rem 1.75rem;">
                         Fechar
                     </button>
                 </div>
             `;
             
             modalBg.appendChild(modal);
-            modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.remove(); };
+            modalBg.onclick = (e) => { if (e.target === modalBg) { modalBg.remove(); renderInstallmentsPage(); } };
             document.body.appendChild(modalBg);
+        }
+
+        function markInstallmentAsPaid(installmentId, parentId) {
+            const installment = transactions.find(t => t.id === installmentId);
+            if (!installment) return;
+
+            // Move date to yesterday to mark as paid
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            installment.date = yesterday.toISOString().split('T')[0];
+            
+            saveToCloud();
+            
+            // Update UI without closing modal
+            const row = document.getElementById(`installment-row-${installmentId}`);
+            const badge = document.getElementById(`status-badge-${installmentId}`);
+            
+            if (badge) {
+                badge.style.background = 'var(--success-light)';
+                badge.style.color = 'var(--success)';
+                badge.textContent = '✓ Paga';
+            }
+            
+            if (row) {
+                const actionCell = row.querySelector('td:last-child');
+                actionCell.innerHTML = `
+                    <button onclick="markInstallmentAsPending(${installmentId}, ${parentId})" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                        Desfazer
+                    </button>
+                `;
+            }
+            
+            // Update page stats
+            updateDashboard();
+        }
+
+        function markInstallmentAsPending(installmentId, parentId) {
+            const installment = transactions.find(t => t.id === installmentId);
+            if (!installment) return;
+
+            // Restore original date
+            const group = transactions.filter(t => t.installmentParentId === parentId);
+            const sorted = group.sort((a, b) => a.installmentNumber - b.installmentNumber);
+            const first = sorted[0];
+            
+            // Calculate what the original date should be
+            const firstDate = new Date(first.date);
+            const monthsToAdd = installment.installmentNumber - first.installmentNumber;
+            const originalDate = new Date(firstDate);
+            originalDate.setMonth(originalDate.getMonth() + monthsToAdd);
+            
+            installment.date = originalDate.toISOString().split('T')[0];
+            
+            saveToCloud();
+            
+            // Update UI without closing modal
+            const row = document.getElementById(`installment-row-${installmentId}`);
+            const badge = document.getElementById(`status-badge-${installmentId}`);
+            
+            if (badge) {
+                badge.style.background = 'var(--warning-light)';
+                badge.style.color = 'var(--warning)';
+                badge.textContent = 'Pendente';
+            }
+            
+            if (row) {
+                const actionCell = row.querySelector('td:last-child');
+                actionCell.innerHTML = `
+                    <button onclick="markInstallmentAsPaid(${installmentId}, ${parentId})" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: var(--success); color: white;">
+                        Marcar como Paga
+                    </button>
+                `;
+            }
+            
+            // Update page stats
+            updateDashboard();
         }
 
         function payOffInstallment(parentId) {
