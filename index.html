@@ -181,24 +181,24 @@
         }
 
         .goal-delete-btn {
-            padding: 0.65rem 1.75rem;
+            padding: 0.5rem 1.25rem;
             font-size: 0.875rem;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
-            min-width: 140px;
+            min-width: 100px;
         }
 
         .goal-update-btn {
             background: var(--success);
             color: white;
-            padding: 0.65rem 1.75rem;
+            padding: 0.5rem 1.25rem;
             font-size: 0.875rem;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
             border: none;
             cursor: pointer;
             transition: all 0.2s;
-            min-width: 180px;
+            min-width: 140px;
         }
 
         .goal-update-btn:hover {
@@ -1652,14 +1652,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-  apiKey: "AIzaSyDIaCERQG7n5LY4RmvBvbUns5CcnyjO1Lw",
-  authDomain: "financas-5c7b4.firebaseapp.com",
-  databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
-  projectId: "financas-5c7b4",
-  storageBucket: "financas-5c7b4.firebasestorage.app",
-  messagingSenderId: "598951471840",
-  appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
-};
+            apiKey: "AIza5y0i45nRqp7n5LY4WavOubUn5CCnyj01Lu",
+            authDomain: "financas-5c7b4.firebaseapp.com",
+            databaseURL: "https://financas-5c7b4-default-rtdb.firebaseio.com",
+            projectId: "financas-5c7b4",
+            storageBucket: "financas-5c7b4.firebasestorage.app",
+            messagingSenderId: "598951471840",
+            appId: "1:598951471840:web:a2d70757f28d8ee9edfeb5"
+        };
 
         let app, database, auth;
         let currentUserEmail = '';
@@ -3300,7 +3300,7 @@
                                 Faltam ${formatCurrency(remaining)} para atingir sua meta
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; align-items: center; justify-content: center;">
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; justify-content: center;">
                             <button class="btn goal-update-btn" onclick="updateGoalProgress(${goal.id})">
                                 Atualizar Progresso
                             </button>
