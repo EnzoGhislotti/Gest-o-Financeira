@@ -200,6 +200,120 @@
             background: #059669;
         }
 
+        .installment-detail-item {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background: var(--bg-secondary);
+        }
+
+        .installment-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .installment-detail-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .installment-detail-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .installment-detail-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .installment-detail-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .installment-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .projection-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .projection-label {
+            min-width: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .projection-chart {
+            flex: 1;
+            height: 28px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .projection-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--danger), #ef4444);
+            border-radius: 6px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+        }
+
+        .projection-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .stat-card.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .stat-card.info .stat-label {
+            color: #3b82f6;
+        }
+
         .info-box {
             background: rgba(37, 99, 235, 0.1);
             padding: 1rem;
@@ -1050,6 +1164,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="installments">
+                            <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                            Parcelas
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#" class="nav-link" data-page="budget">
                             <svg class="nav-icon" viewBox="0 0 24 24" stroke-width="2">
                                 <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
@@ -1345,6 +1468,51 @@
                 </div>
             </div>
 
+            <!-- Installments Page -->
+            <div id="installments-page" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">💳 Minhas Parcelas</h1>
+                    <p class="page-subtitle">Gerencie suas compras parceladas de forma inteligente</p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card primary">
+                        <div class="stat-label">Compras Ativas</div>
+                        <div class="stat-value" id="installmentsActive">0</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-label">Parcelas Pendentes</div>
+                        <div class="stat-value" id="installmentsPending">0</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-label">Valor Mensal Total</div>
+                        <div class="stat-value" id="installmentsMonthly">R$ 0,00</div>
+                    </div>
+                    <div class="stat-card info">
+                        <div class="stat-label">Comprometimento</div>
+                        <div class="stat-value" id="installmentsCommitment">0%</div>
+                    </div>
+                </div>
+
+                <!-- Projection Chart -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <h2 class="card-title">📊 Projeção - Próximos 6 Meses</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Visualize o impacto das parcelas no seu orçamento</p>
+                    </div>
+                    <div id="installmentsProjection" style="padding: 1rem;"></div>
+                </div>
+
+                <!-- Active Installments List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Compras Parceladas</h2>
+                    </div>
+                    <div id="installmentsList"></div>
+                </div>
+            </div>
+
             <!-- Budget Page -->
             <div id="budget-page" class="page" style="display: none;">
                 <div class="page-header">
@@ -1486,6 +1654,7 @@
   messagingSenderId: "598951471840",
   appId: "1:598951471840:web:a2d70757f28d8ee9edfe85"
 };
+
 
         let app, database, auth;
         let currentUserEmail = '';
@@ -1814,6 +1983,7 @@
 
             if (page === 'dashboard') updateDashboard();
             if (page === 'transactions') renderTransactions();
+            if (page === 'installments') renderInstallmentsPage();
             if (page === 'budget') renderBudgets();
             if (page === 'insights') updateInsights();
             if (page === 'goals') renderGoals();
@@ -1822,6 +1992,249 @@
         function updateInsights() {
             const { income, expense, balance, savingsRate } = calculateTotals('all', '', '', '');
             generateInsights(income, expense, balance, parseFloat(savingsRate), transactions);
+        }
+
+        function renderInstallmentsPage() {
+            // Calculate summary
+            const installmentGroups = {};
+            transactions.filter(t => t.isInstallment).forEach(t => {
+                if (!installmentGroups[t.installmentParentId]) {
+                    installmentGroups[t.installmentParentId] = [];
+                }
+                installmentGroups[t.installmentParentId].push(t);
+            });
+
+            const today = new Date();
+            const activeGroups = Object.values(installmentGroups).filter(group => 
+                group.some(t => new Date(t.date) >= today)
+            );
+
+            const totalPending = activeGroups.reduce((sum, group) => {
+                const remaining = group.filter(t => new Date(t.date) >= today).length;
+                return sum + remaining;
+            }, 0);
+
+            const monthlyTotal = activeGroups.reduce((sum, group) => {
+                return sum + group[0].amount;
+            }, 0);
+
+            const { income } = calculateTotals('all', '', '', '');
+            const commitment = income > 0 ? ((monthlyTotal / income) * 100).toFixed(1) : 0;
+
+            document.getElementById('installmentsActive').textContent = activeGroups.length;
+            document.getElementById('installmentsPending').textContent = totalPending;
+            document.getElementById('installmentsMonthly').textContent = formatCurrency(monthlyTotal);
+            document.getElementById('installmentsCommitment').textContent = commitment + '%';
+
+            // Render projection
+            renderInstallmentsProjection(installmentGroups);
+
+            // Render list
+            renderInstallmentsList(activeGroups);
+        }
+
+        function renderInstallmentsProjection(installmentGroups) {
+            const projectionEl = document.getElementById('installmentsProjection');
+            const today = new Date();
+            const projections = [];
+
+            for (let i = 0; i < 6; i++) {
+                const targetDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
+                const monthStr = targetDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+                const monthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+
+                let monthTotal = 0;
+                Object.values(installmentGroups).forEach(group => {
+                    const monthInstallment = group.find(t => t.date.startsWith(monthKey));
+                    if (monthInstallment) {
+                        monthTotal += monthInstallment.amount;
+                    }
+                });
+
+                projections.push({
+                    month: monthStr.charAt(0).toUpperCase() + monthStr.slice(1),
+                    amount: monthTotal
+                });
+            }
+
+            const maxAmount = Math.max(...projections.map(p => p.amount), 100);
+
+            if (projections.every(p => p.amount === 0)) {
+                projectionEl.innerHTML = '<div class="empty-state"><p>Nenhuma parcela ativa no momento</p></div>';
+                return;
+            }
+
+            projectionEl.innerHTML = projections.map(p => {
+                const percentage = (p.amount / maxAmount) * 100;
+                return `
+                    <div class="projection-bar">
+                        <div class="projection-label">${p.month}</div>
+                        <div class="projection-chart">
+                            <div class="projection-fill" style="width: ${percentage}%">
+                                ${p.amount > 0 ? `<span class="projection-value">${formatCurrency(p.amount)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderInstallmentsList(activeGroups) {
+            const listEl = document.getElementById('installmentsList');
+
+            if (activeGroups.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><p>Você não tem compras parceladas ativas</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = activeGroups.map(group => {
+                const sorted = group.sort((a, b) => a.installmentNumber - b.installmentNumber);
+                const first = sorted[0];
+                const today = new Date();
+                const paid = sorted.filter(t => new Date(t.date) < today).length;
+                const percentage = (paid / first.installmentTotal * 100).toFixed(0);
+                const remaining = first.installmentTotal - paid;
+                const remainingAmount = remaining * first.amount;
+                const nextInstallment = sorted.find(t => new Date(t.date) >= today);
+
+                return `
+                    <div class="installment-detail-item">
+                        <div class="installment-detail-header">
+                            <div>
+                                <div class="installment-detail-title">${first.description}</div>
+                                <div class="installment-detail-subtitle">${first.bank} • ${first.paymentMethod} • ${first.category}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="installment-detail-amount">${formatCurrency(first.amount)}<span style="font-size: 0.875rem;">/mês</span></div>
+                                <div class="installment-detail-meta">Total: ${formatCurrency(first.installmentOriginalAmount)}</div>
+                            </div>
+                        </div>
+                        <div class="installment-progress">
+                            <div class="installment-progress-text">
+                                <span>Paga ${paid}/${first.installmentTotal} parcelas</span>
+                                <span>${percentage}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="installment-dots" style="margin-top: 0.75rem;">
+                                ${Array.from({length: first.installmentTotal}, (_, i) => 
+                                    `<div class="installment-dot ${i < paid ? 'paid' : ''}"></div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <span style="color: var(--text-secondary); font-size: 0.875rem;">
+                                Faltam ${formatCurrency(remainingAmount)} • ${nextInstallment ? `Próxima: ${formatDate(nextInstallment.date)}` : 'Finalizada'}
+                            </span>
+                        </div>
+                        <div class="installment-actions">
+                            <button class="btn btn-outline" onclick="viewInstallmentDetails(${first.installmentParentId})">
+                                Ver Detalhes
+                            </button>
+                            <button class="btn btn-secondary" onclick="payOffInstallment(${first.installmentParentId})" style="background: var(--success); color: white; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                Quitar Todas
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteAllInstallments(${first.installmentParentId})" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                Excluir Todas
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewInstallmentDetails(parentId) {
+            const group = transactions.filter(t => t.installmentParentId === parentId);
+            if (group.length === 0) return;
+
+            const sorted = group.sort((a, b) => a.installmentNumber - b.installmentNumber);
+            const today = new Date();
+
+            let detailsHTML = `
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <h3 style="margin-bottom: 1rem;">${sorted[0].description}</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border);">
+                                <th style="text-align: left; padding: 0.75rem;">Parcela</th>
+                                <th style="text-align: left; padding: 0.75rem;">Vencimento</th>
+                                <th style="text-align: right; padding: 0.75rem;">Valor</th>
+                                <th style="text-align: center; padding: 0.75rem;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sorted.map(t => {
+                                const isPaid = new Date(t.date) < today;
+                                return `
+                                    <tr style="border-bottom: 1px solid var(--border);">
+                                        <td style="padding: 0.75rem;">${t.installmentNumber}/${t.installmentTotal}</td>
+                                        <td style="padding: 0.75rem;">${formatDate(t.date)}</td>
+                                        <td style="text-align: right; padding: 0.75rem;">${formatCurrency(t.amount)}</td>
+                                        <td style="text-align: center; padding: 0.75rem;">
+                                            <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: ${isPaid ? 'var(--success-light)' : 'var(--warning-light)'}; color: ${isPaid ? 'var(--success)' : 'var(--warning)'};">
+                                                ${isPaid ? '✓ Paga' : 'Pendente'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const modalBg = document.createElement('div');
+            modalBg.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = 'background: var(--bg-primary); border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);';
+            modal.innerHTML = detailsHTML + `
+                <div style="margin-top: 1.5rem; text-align: right;">
+                    <button class="btn btn-secondary" onclick="this.closest('[style*=fixed]').remove()" style="padding: 0.65rem 1.75rem;">
+                        Fechar
+                    </button>
+                </div>
+            `;
+            
+            modalBg.appendChild(modal);
+            modalBg.onclick = (e) => { if (e.target === modalBg) modalBg.remove(); };
+            document.body.appendChild(modalBg);
+        }
+
+        function payOffInstallment(parentId) {
+            const group = transactions.filter(t => t.installmentParentId === parentId);
+            if (group.length === 0) return;
+
+            const today = new Date();
+            const remaining = group.filter(t => new Date(t.date) >= today);
+            const totalRemaining = remaining.reduce((sum, t) => sum + t.amount, 0);
+
+            if (confirm(`Deseja quitar as ${remaining.length} parcelas restantes de ${group[0].description}?\n\nValor total: ${formatCurrency(totalRemaining)}`)) {
+                // Mark all future installments as paid by moving their dates to today
+                remaining.forEach(t => {
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    t.date = yesterday.toISOString().split('T')[0];
+                });
+                
+                saveToCloud();
+                renderInstallmentsPage();
+                updateDashboard();
+                alert('Parcelas quitadas com sucesso!');
+            }
+        }
+
+        function deleteAllInstallments(parentId) {
+            const group = transactions.filter(t => t.installmentParentId === parentId);
+            if (group.length === 0) return;
+
+            if (confirm(`Deseja excluir TODAS as ${group.length} parcelas de ${group[0].description}?`)) {
+                transactions = transactions.filter(t => t.installmentParentId !== parentId);
+                saveToCloud();
+                renderInstallmentsPage();
+                updateDashboard();
+            }
         }
 
         function formatCurrency(value) {
@@ -2794,9 +3207,6 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; justify-content: center;">
-                            <button class="btn btn-secondary goal-update-btn" onclick="updateGoalProgress(${goal.id})">
-                                Atualizar Progresso
-                            </button>
                             <button class="btn btn-danger goal-delete-btn" onclick="deleteGoal(${goal.id})">
                                 Excluir
                             </button>
