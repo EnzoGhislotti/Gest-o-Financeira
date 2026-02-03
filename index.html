@@ -185,6 +185,7 @@
             font-size: 0.875rem;
             border-radius: 8px;
             font-weight: 600;
+            min-width: 140px;
         }
 
         .goal-update-btn {
@@ -194,10 +195,15 @@
             font-size: 0.875rem;
             border-radius: 8px;
             font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 180px;
         }
 
         .goal-update-btn:hover {
             background: #059669;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
         .installment-detail-item {
@@ -3294,8 +3300,8 @@
                                 Faltam ${formatCurrency(remaining)} para atingir sua meta
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; justify-content: center;">
-                            <button class="btn btn-secondary goal-update-btn" onclick="updateGoalProgress(${goal.id})">
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; align-items: center; justify-content: center;">
+                            <button class="btn goal-update-btn" onclick="updateGoalProgress(${goal.id})">
                                 Atualizar Progresso
                             </button>
                             <button class="btn btn-danger goal-delete-btn" onclick="deleteGoal(${goal.id})">
