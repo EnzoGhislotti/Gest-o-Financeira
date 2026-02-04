@@ -180,25 +180,12 @@
             border-radius: 6px;
         }
 
-        .goal-delete-btn {
-            padding: 0.65rem 1.75rem;
-            font-size: 0.875rem;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .goal-update-btn {
-            background: var(--success);
-            color: white;
-            padding: 0.65rem 1.75rem;
-            font-size: 0.875rem;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
         .goal-update-btn:hover {
             background: #059669;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
+
+        /* Removed .goal-update-btn and .goal-delete-btn to avoid conflicts */
 
         .installment-detail-item {
             padding: 1rem;
@@ -3294,11 +3281,11 @@
                                 Faltam ${formatCurrency(remaining)} para atingir sua meta
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; justify-content: center;">
-                            <button class="btn btn-secondary goal-update-btn" onclick="updateGoalProgress(${goal.id})">
+                        <div style="display: flex; gap: 8px; margin-top: 16px; align-items: center; justify-content: center;">
+                            <button onclick="updateGoalProgress(${goal.id})" style="background: #10b981 !important; color: white !important; padding: 8px 20px !important; font-size: 14px !important; border-radius: 6px !important; font-weight: 600 !important; border: none !important; cursor: pointer !important; transition: all 0.2s !important; min-width: auto !important; width: auto !important;">
                                 Atualizar Progresso
                             </button>
-                            <button class="btn btn-danger goal-delete-btn" onclick="deleteGoal(${goal.id})">
+                            <button onclick="deleteGoal(${goal.id})" style="background: #ef4444 !important; color: white !important; padding: 8px 20px !important; font-size: 14px !important; border-radius: 6px !important; font-weight: 600 !important; border: none !important; cursor: pointer !important; transition: all 0.2s !important; min-width: auto !important; width: auto !important;">
                                 Excluir
                             </button>
                         </div>
